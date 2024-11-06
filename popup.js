@@ -152,37 +152,23 @@ document.addEventListener('DOMContentLoaded', async function () {
     const quizArea = document.getElementById('quizArea');
 
     // Function to convert markup to plain text with styling
-    function convertMarkupToHTML(text) {
-        const headingRegex = /^(#{1,6}) (.*)$/gm;
+    function convertMarkdownToHTML(text) {
+        const headingRegex = /^(#{1,6})\s+(.*)$/gm;
         const boldRegex = /\*\*(.*?)\*\*/g;
         const italicRegex = /\*(.*?)\*/g;
-        const codeBlockRegex = /```(.*?)```/gs;
-        const listRegex = /^(\d+\.|\*)\s(.*)$/gm;
+        const codeBlockRegex = /```([\s\S]*?)```/g;
+        const listRegex = /^(\d+\.|[-*])\s+(.*)/gm;
         const linkRegex = /\[(.*?)\]\((.*?)\)/g;
         const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
         const horizontalRuleRegex = /^---+$/gm;
 
-        // Function to handle nested lists
-        function handleNestedLists(text) {
-            let listDepth = 0;
-            let currentTag = 'ul';
-            let currentList = '';
-
-            return text.replace(listRegex, (match, item, content) => {
-                const newDepth = item.startsWith('*') ? 1 : 2;
-                const tag = newDepth > listDepth ? `<${newDepth === 1 ? 'ul' : 'ol'}><li>` : '</li>';
-                listDepth = newDepth;
-
-                if (tag.includes('ol') || tag.includes('ul')) {
-                    currentList += tag + content;
-                } else {
-                    currentList += '</li>' + tag + content;
-                }
-                return currentList;
-            }).replace(/\n$/, `</li></${currentTag}>`);
+        function handleListItem(match, marker, content) {
+            const isOrdered = marker.endsWith('.');
+            const tag = isOrdered ? 'ol' : 'ul';
+            const item = `<li>${content}</li>`;
+            return `<${tag}>${item}</${tag}>`;
         }
 
-        // Convert Markdown to HTML
         text = text.replace(headingRegex, (match, hashes, content) => {
             const level = hashes.length;
             return `<h${level}>${content}</h${level}>`;
@@ -190,8 +176,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         text = text.replace(boldRegex, '<strong>$1</strong>');
         text = text.replace(italicRegex, '<em>$1</em>');
-        text = text.replace(codeBlockRegex, '<pre><code>$1</code></pre>');
-        text = handleNestedLists(text);
+        text = text.replace(codeBlockRegex, (match, code) => {
+            const formattedCode = code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return `<pre><code>${formattedCode}</code></pre>`;
+        });
+        text = text.replace(listRegex, handleListItem);
         text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
         text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
         text = text.replace(horizontalRuleRegex, '<hr>');
@@ -199,7 +188,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         return text;
     }
-
 
     generateQuizBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
@@ -216,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 response = chunk.trim();
 
 
-                const formattedQuizResponse = convertMarkupToHTML(response);
+                const formattedQuizResponse = convertMarkdownToHTML(response);
                 quizArea.innerHTML = formattedQuizResponse;
             }
         } catch (error) {
@@ -272,6 +260,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+
+
     async function generateChatResponse(userMessage) {
         const prompt = `Human: ${userMessage}\nAI:`;
 
@@ -280,26 +270,35 @@ document.addEventListener('DOMContentLoaded', async function () {
         const stream = await aiSession.promptStreaming(prompt);
 
         for await (const chunk of stream) {
-            response = chunk;
-            updateMessageContent(messageEl, convertMarkupToHTML(response)); // Append content instead of replacing
+            // response = chunk;
+            updateMessageContent(messageEl, convertMarkdownToHTML(chunk)); // Append content instead of replacing
         }
         addCopyButton(messageEl); // Add the copy button once the response is fully loaded
         return response.trim();
     }
 
+
+
     // Function to append a new message element
     function appendMessage(role, msg) {
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${role}`;
-        messageEl.innerText = msg;
+
+        const messageContent = document.createElement('span'); // Text content container
+        messageContent.innerHTML = msg; // Using innerHTML to allow for rich content
+
+        messageEl.appendChild(messageContent);
         chatMessages.appendChild(messageEl);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+
         return messageEl;
     }
 
+
     // Function to update the content of an existing message element
     function updateMessageContent(messageEl, msg) {
-        messageEl.innerHTML = msg;
+        const messageContent = messageEl.querySelector('span');
+        messageContent.innerHTML = msg;
     }
 
     // Function to add a copy button to each robot message
@@ -307,7 +306,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         const copyBtn = document.createElement('button');
         copyBtn.innerText = 'Copy';
         copyBtn.className = 'copy-btn';
-        copyBtn.onclick = () => copyToClipboard(messageEl.innerText);
+        copyBtn.onclick = () => copyToClipboard(messageEl.querySelector('span').innerText);
+
         messageEl.appendChild(copyBtn);
     }
 
@@ -325,4 +325,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (e.key === 'Enter') handleChatInput();
     });
 
+
 });
+
+
