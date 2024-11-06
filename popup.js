@@ -129,13 +129,14 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         simplifyResult.innerText = 'Simplifying...';
         const level = simplificationLevel.value;
-        const prompt = `${level === 'basic' ? 'Simplify' : 'Explain technically'} the following text:\n\n${text}`;
+        const prompt = `${level === 'basic' ? 'Simplify in very basic language ' : 'Explain technically in very technical and professional language'} ,the given text:\n\n${text}`;
+
         try {
             const stream = await aiSession.promptStreaming(prompt);
-            let response = '';
+            let response = ''; // Initialize response variable
 
             for await (const chunk of stream) {
-                response += chunk;
+                response = chunk.trim();
                 simplifyResult.innerText = response;
             }
         } catch (error) {
@@ -144,10 +145,61 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
+
     // Quiz tab logic
     const generateQuizBtn = document.getElementById('generateQuizBtn');
     const quizType = document.getElementById('quizType');
     const quizArea = document.getElementById('quizArea');
+
+    // Function to convert markup to plain text with styling
+    function convertMarkupToHTML(text) {
+        const headingRegex = /^(#{1,6}) (.*)$/gm;
+        const boldRegex = /\*\*(.*?)\*\*/g;
+        const italicRegex = /\*(.*?)\*/g;
+        const codeBlockRegex = /```(.*?)```/gs;
+        const listRegex = /^(\d+\.|\*)\s(.*)$/gm;
+        const linkRegex = /\[(.*?)\]\((.*?)\)/g;
+        const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+        const horizontalRuleRegex = /^---+$/gm;
+
+        // Function to handle nested lists
+        function handleNestedLists(text) {
+            let listDepth = 0;
+            let currentTag = 'ul';
+            let currentList = '';
+
+            return text.replace(listRegex, (match, item, content) => {
+                const newDepth = item.startsWith('*') ? 1 : 2;
+                const tag = newDepth > listDepth ? `<${newDepth === 1 ? 'ul' : 'ol'}><li>` : '</li>';
+                listDepth = newDepth;
+
+                if (tag.includes('ol') || tag.includes('ul')) {
+                    currentList += tag + content;
+                } else {
+                    currentList += '</li>' + tag + content;
+                }
+                return currentList;
+            }).replace(/\n$/, `</li></${currentTag}>`);
+        }
+
+        // Convert Markdown to HTML
+        text = text.replace(headingRegex, (match, hashes, content) => {
+            const level = hashes.length;
+            return `<h${level}>${content}</h${level}>`;
+        });
+
+        text = text.replace(boldRegex, '<strong>$1</strong>');
+        text = text.replace(italicRegex, '<em>$1</em>');
+        text = text.replace(codeBlockRegex, '<pre><code>$1</code></pre>');
+        text = handleNestedLists(text);
+        text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
+        text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
+        text = text.replace(horizontalRuleRegex, '<hr>');
+        text = text.replace(/\n/g, '<br>');
+
+        return text;
+    }
+
 
     generateQuizBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
@@ -161,8 +213,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             let response = '';
 
             for await (const chunk of stream) {
-                response += chunk;
-                quizArea.innerText = response;
+                response = chunk.trim();
+
+
+                const formattedQuizResponse = convertMarkupToHTML(response);
+                quizArea.innerHTML = formattedQuizResponse;
             }
         } catch (error) {
             console.error('Error generating quiz:', error);
@@ -177,82 +232,81 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
 
+
+
+
+
+
+
+
+    //chat
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const sendChatBtn = document.getElementById('sendChatBtn');
 
-    // Function to convert markdown to plain text
-    function convertMarkdownToText(markdown) {
-        return markdown.replace(/(\*\*|__)(.*?)\1/g, '$2')
-            .replace(/(\*|_)(.*?)\1/g, '$2')
-            .replace(/(#+) (.*)/g, '$2')
-            .replace(/\[(.*?)\]\(.*?\)/g, '$1')
-            .replace(/\n/g, ' ');
-    }
-
-    // Function to handle sending chat input
     async function handleChatInput() {
         const question = chatInput.value.trim();
         if (!question) return;
 
-        chatInput.value = ''; // Clear input
+        // Clear the input
+        chatInput.value = '';
         appendMessage('user', question);
-        sendChatBtn.disabled = true; // Disable the send button
+        sendChatBtn.disabled = true; // Disable the send button while waiting for response
 
+        // Initialize AI session if not already initialized
         if (!aiSession && !(await initAI())) {
-            sendChatBtn.disabled = false; // Re-enable the button if AI initialization fails
+            sendChatBtn.disabled = false;
             return;
         }
 
-        const prompt = question;
+        // Make the API call and handle the response
         try {
-            const stream = await aiSession.promptStreaming(prompt);
-            let response = '';
-            let previousLength = 0; // Track previous chunk length
-
-            // Stream response from AI
-            for await (const chunk of stream) {
-                const newContent = chunk.slice(previousLength);
-                previousLength = chunk.length;
-                response += newContent;
-
-                const plainText = convertMarkdownToText(response);
-                updateMessage('robot', plainText); // Update chat message in real-time
-            }
+            const response = await generateChatResponse(question);
+            appendMessage('robot', response);
         } catch (error) {
-            console.error('Chatbot error:', error);
-            updateMessage('robot', 'Failed to get response. Please try again.');
+            console.error('Error generating response:', error);
+            appendMessage('robot', 'Failed to get response. Please try again.');
         } finally {
-            sendChatBtn.disabled = false; // Re-enable the button
-            chatInput.focus(); // Focus back on the input
+            sendChatBtn.disabled = false;
+            chatInput.focus();
         }
     }
 
-    // Function to append a new message to the chat
+    async function generateChatResponse(userMessage) {
+        const prompt = `Human: ${userMessage}\nAI:`;
+
+        let response = '';
+        const stream = await aiSession.promptStreaming(prompt);
+
+        for await (const chunk of stream) {
+            response += chunk;
+            updateMessage('robot', response);
+        }
+
+        return response.trim();
+    }
+
     function appendMessage(role, msg) {
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${role}`;
         messageEl.innerText = msg;
         chatMessages.appendChild(messageEl);
-        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Function to update the last message from the AI
     function updateMessage(role, msg) {
         const lastMessage = Array.from(chatMessages.getElementsByClassName('chat-message'))
             .filter(el => el.classList.contains(role)).pop();
-        if (lastMessage) lastMessage.innerText = msg; // Update last message text
+        if (lastMessage) lastMessage.innerText = msg;
     }
 
-    // Event listeners for sending chat
+    function sanitizeText(text) {
+        // Replace any unwanted characters or sanitize the response
+        return text.replace(/<[^>]*>/g, '').replace(/[\n\r]+/g, ' ').trim();
+    }
+
     sendChatBtn.addEventListener('click', handleChatInput);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleChatInput();
     });
-
-
-
-
-
-
 });
