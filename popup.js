@@ -31,42 +31,50 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize AI session
     await initAI();
 
+
+
+
     // Function to convert markup to plain text with styling
     function convertMarkdownToHTML(text) {
-        const headingRegex = /^(#{1,6})\s+(.*)$/gm;
-        const boldRegex = /\*\*(.*?)\*\*/g;
-        const italicRegex = /\*(.*?)\*/g;
-        const codeBlockRegex = /```([\s\S]*?)```/g;
-        const listRegex = /^(\d+\.|[-*])\s+(.*)/gm;
-        const linkRegex = /\[(.*?)\]\((.*?)\)/g;
-        const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
-        const horizontalRuleRegex = /^---+$/gm;
+        if (text) {
+            const headingRegex = /^(#{1,6})\s+(.*)$/gm;
+            const boldRegex = /\*\*(.*?)\*\*/g;
+            const italicRegex = /\*(.*?)\*/g;
+            const codeBlockRegex = /```([\s\S]*?)```/g;
+            const listRegex = /^(\d+\.|[-*])\s+(.*)/gm;
+            const linkRegex = /\[(.*?)\]\((.*?)\)/g;
+            const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+            const horizontalRuleRegex = /^---+$/gm;
 
-        function handleListItem(match, marker, content) {
-            const isOrdered = marker.endsWith('.');
-            const tag = isOrdered ? 'ol' : 'ul';
-            const item = `<li>${content}</li>`;
-            return `<${tag}>${item}</${tag}>`;
+            function handleListItem(match, marker, content) {
+                const isOrdered = marker.endsWith('.');
+                const tag = isOrdered ? 'ol' : 'ul';
+                const item = `<li>${content}</li>`;
+                return `<${tag}>${item}</${tag}>`;
+            }
+
+            text = text.replace(headingRegex, (match, hashes, content) => {
+                const level = hashes.length;
+                return `<h${level}>${content}</h${level}>`;
+            });
+
+            text = text.replace(boldRegex, '<strong>$1</strong>');
+            text = text.replace(italicRegex, '<em>$1</em>');
+            text = text.replace(codeBlockRegex, (match, code) => {
+                const formattedCode = code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return `<pre><code>${formattedCode}</code></pre>`;
+            });
+            text = text.replace(listRegex, handleListItem);
+            text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
+            text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
+            text = text.replace(horizontalRuleRegex, '<hr>');
+            text = text.replace(/\n/g, '<br>');
+
+            return text;
         }
-
-        text = text.replace(headingRegex, (match, hashes, content) => {
-            const level = hashes.length;
-            return `<h${level}>${content}</h${level}>`;
-        });
-
-        text = text.replace(boldRegex, '<strong>$1</strong>');
-        text = text.replace(italicRegex, '<em>$1</em>');
-        text = text.replace(codeBlockRegex, (match, code) => {
-            const formattedCode = code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return `<pre><code>${formattedCode}</code></pre>`;
-        });
-        text = text.replace(listRegex, handleListItem);
-        text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
-        text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
-        text = text.replace(horizontalRuleRegex, '<hr>');
-        text = text.replace(/\n/g, '<br>');
-
-        return text;
+        else {
+            return " "
+        }
     }
 
     // Function to create and manage the summarizer
