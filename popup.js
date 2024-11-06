@@ -239,7 +239,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
 
-    //chat
+    //Chat Functionality
+
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const sendChatBtn = document.getElementById('sendChatBtn');
@@ -261,8 +262,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Make the API call and handle the response
         try {
-            const response = await generateChatResponse(question);
-            appendMessage('robot', response);
+            await generateChatResponse(question);
         } catch (error) {
             console.error('Error generating response:', error);
             appendMessage('robot', 'Failed to get response. Please try again.');
@@ -276,37 +276,53 @@ document.addEventListener('DOMContentLoaded', async function () {
         const prompt = `Human: ${userMessage}\nAI:`;
 
         let response = '';
+        const messageEl = appendMessage('robot', 'Generating...'); // Initial empty message
         const stream = await aiSession.promptStreaming(prompt);
 
         for await (const chunk of stream) {
-            response += chunk;
-            updateMessage('robot', response);
+            response = chunk;
+            updateMessageContent(messageEl, convertMarkupToHTML(response)); // Append content instead of replacing
         }
-
+        addCopyButton(messageEl); // Add the copy button once the response is fully loaded
         return response.trim();
     }
 
+    // Function to append a new message element
     function appendMessage(role, msg) {
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${role}`;
         messageEl.innerText = msg;
         chatMessages.appendChild(messageEl);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        return messageEl;
     }
 
-    function updateMessage(role, msg) {
-        const lastMessage = Array.from(chatMessages.getElementsByClassName('chat-message'))
-            .filter(el => el.classList.contains(role)).pop();
-        if (lastMessage) lastMessage.innerText = msg;
+    // Function to update the content of an existing message element
+    function updateMessageContent(messageEl, msg) {
+        messageEl.innerHTML = msg;
     }
 
-    function sanitizeText(text) {
-        // Replace any unwanted characters or sanitize the response
-        return text.replace(/<[^>]*>/g, '').replace(/[\n\r]+/g, ' ').trim();
+    // Function to add a copy button to each robot message
+    function addCopyButton(messageEl) {
+        const copyBtn = document.createElement('button');
+        copyBtn.innerText = 'Copy';
+        copyBtn.className = 'copy-btn';
+        copyBtn.onclick = () => copyToClipboard(messageEl.innerText);
+        messageEl.appendChild(copyBtn);
+    }
+
+    // Copy text to clipboard
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Response copied to clipboard!');
+        }).catch((error) => {
+            console.error('Failed to copy text:', error);
+        });
     }
 
     sendChatBtn.addEventListener('click', handleChatInput);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleChatInput();
     });
+
 });

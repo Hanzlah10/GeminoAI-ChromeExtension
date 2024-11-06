@@ -66,6 +66,8 @@
                 </div>
             </section>
 
+
+            <!-- Chat Tab  -->
             <section id="chat" class="tab-content">
                 <div class="chat-container">
                     <div id="chatMessages" class="chat-messages"></div>
@@ -76,110 +78,6 @@
                 </div>
             </section>
 
-
-
-            <style>
-                /* Basic styling for chat interface */
-                .chat-container {
-                    width: 100%;
-                    max-width: 600px;
-                    /* Set a max-width for the chat container */
-                    margin: 0 auto;
-                    /* Center the container */
-                    border: 1px solid #ddd;
-                    /* Add a border */
-                    border-radius: 8px;
-                    /* Rounded corners */
-                    overflow: hidden;
-                    /* Hide overflow */
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                    /* Add shadow */
-                }
-
-                .chat-messages {
-                    height: 400px;
-                    /* Set height for the messages area */
-                    overflow-y: auto;
-                    /* Enable vertical scrolling */
-                    padding: 10px;
-                    /* Padding inside the message area */
-                    background-color: #f9f9f9;
-                    /* Light background for messages */
-                }
-
-                .chat-message {
-                    margin: 5px 0;
-                    /* Space between messages */
-                    padding: 8px;
-                    /* Padding inside messages */
-                    border-radius: 4px;
-                    /* Rounded corners for messages */
-                    max-width: 70%;
-                    /* Limit width of messages */
-                    word-wrap: break-word;
-                    /* Allow word wrapping */
-                }
-
-                .user {
-                    background-color: #d1e7dd;
-                    /* Light green for user messages */
-                    align-self: flex-end;
-                    /* Align user messages to the right */
-                }
-
-                .robot {
-                    background-color: #f1f1f1;
-                    /* Light grey for robot messages */
-                    align-self: flex-start;
-                    /* Align robot messages to the left */
-                }
-
-                .chat-input {
-                    display: flex;
-                    /* Use flexbox for input and button */
-                    padding: 10px;
-                    /* Padding for input area */
-                    background-color: #fff;
-                    /* White background for input area */
-                    border-top: 1px solid #ddd;
-                    /* Border at the top */
-                }
-
-                #chatInput {
-                    flex: 1;
-                    /* Allow input to grow */
-                    border: 1px solid #ddd;
-                    /* Border for input */
-                    border-radius: 4px;
-                    /* Rounded corners */
-                    padding: 10px;
-                    /* Padding inside input */
-                    margin-right: 10px;
-                    /* Space between input and button */
-                }
-
-                .primary-btn {
-                    padding: 10px 15px;
-                    /* Padding for button */
-                    background-color: #007bff;
-                    /* Blue background for button */
-                    color: white;
-                    /* White text for button */
-                    border: none;
-                    /* No border */
-                    border-radius: 4px;
-                    /* Rounded corners */
-                    cursor: pointer;
-                    /* Pointer cursor on hover */
-                }
-
-                .primary-btn:disabled {
-                    background-color: #6c757d;
-                    /* Grey background for disabled button */
-                    cursor: not-allowed;
-                    /* Not-allowed cursor for disabled button */
-                }
-            </style>
 
 
         </main>
