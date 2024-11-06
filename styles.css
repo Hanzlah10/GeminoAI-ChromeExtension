@@ -37,6 +37,18 @@ body {
     margin: 0 auto;
 }
 
+.error-alert {
+    background-color: #f8d7da;
+    color: var(--error-color);
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    align-items: center;
+}
+
+
 header h1 {
     color: var(--primary-color);
     font-size: 2.5em;
@@ -150,7 +162,7 @@ select {
     padding: 10px;
     margin: 8px 0;
     border-radius: 8px;
-    max-width: 70%;
+    max-width: 100%;
     word-wrap: break-word;
     position: relative;
     padding-bottom: 24px;
@@ -161,6 +173,13 @@ select {
     background-color: var(--user-message-bg);
     align-self: flex-end;
     text-align: right;
+}
+
+.chat-message.alert {
+    color: var(--error-color);
+    background-color: white;
+    align-self: flex-end;
+    text-align: center;
 }
 
 .chat-message.robot {
@@ -189,21 +208,35 @@ select {
 
 .chat-input {
     display: flex;
-    padding: 10px;
     background: #f7f7f7;
-    border-top: 1px solid var(--border-color);
 }
+
+
 
 .chat-input input {
     flex: 1;
-    padding: 10px;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin-right: 10px;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+    border-right: none; /* Removes overlapping border */
+    height: 40px; /* Ensures input and button are the same height */
 }
 
 .chat-input button {
-    padding: 10px 15px;
+    padding: 0px 17px;
+    border: 1px solid var(--border-color);
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-left: none; /* Removes overlapping border */
+    height: 40px; /* Matches the height of the input */
 }
+
+.chat-input input,
+.chat-input button {
+    box-sizing: border-box;
+    margin: 5px;
+
+}
+
 
 

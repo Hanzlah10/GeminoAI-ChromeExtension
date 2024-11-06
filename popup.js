@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             aiSession = await self.ai.languageModel.create({
                 temperature: 1,
                 topK: 4,
+                systemPrompt: "Pretend to be a Tutor"
             });
             return true;
         } catch (error) {
@@ -29,6 +30,44 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Initialize AI session
     await initAI();
+
+    // Function to convert markup to plain text with styling
+    function convertMarkdownToHTML(text) {
+        const headingRegex = /^(#{1,6})\s+(.*)$/gm;
+        const boldRegex = /\*\*(.*?)\*\*/g;
+        const italicRegex = /\*(.*?)\*/g;
+        const codeBlockRegex = /```([\s\S]*?)```/g;
+        const listRegex = /^(\d+\.|[-*])\s+(.*)/gm;
+        const linkRegex = /\[(.*?)\]\((.*?)\)/g;
+        const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+        const horizontalRuleRegex = /^---+$/gm;
+
+        function handleListItem(match, marker, content) {
+            const isOrdered = marker.endsWith('.');
+            const tag = isOrdered ? 'ol' : 'ul';
+            const item = `<li>${content}</li>`;
+            return `<${tag}>${item}</${tag}>`;
+        }
+
+        text = text.replace(headingRegex, (match, hashes, content) => {
+            const level = hashes.length;
+            return `<h${level}>${content}</h${level}>`;
+        });
+
+        text = text.replace(boldRegex, '<strong>$1</strong>');
+        text = text.replace(italicRegex, '<em>$1</em>');
+        text = text.replace(codeBlockRegex, (match, code) => {
+            const formattedCode = code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return `<pre><code>${formattedCode}</code></pre>`;
+        });
+        text = text.replace(listRegex, handleListItem);
+        text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
+        text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
+        text = text.replace(horizontalRuleRegex, '<hr>');
+        text = text.replace(/\n/g, '<br>');
+
+        return text;
+    }
 
     // Function to create and manage the summarizer
     async function createSummarizer() {
@@ -109,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const pageText = tabText[0].result;
             const summary = await summarizeText(pageText);
-            summaryResult.innerText = summary;
+            summaryResult.innerText = convertMarkdownToHTML(summary);
         } catch (error) {
             console.error('Error generating summary:', error);
             summaryResult.innerText = 'Failed to summarize the page. Please try another page or refresh.';
@@ -137,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             for await (const chunk of stream) {
                 response = chunk.trim();
-                simplifyResult.innerText = response;
+                simplifyResult.innerText = convertMarkdownToHTML(response);
             }
         } catch (error) {
             console.error('Error simplifying text:', error);
@@ -151,43 +190,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const quizType = document.getElementById('quizType');
     const quizArea = document.getElementById('quizArea');
 
-    // Function to convert markup to plain text with styling
-    function convertMarkdownToHTML(text) {
-        const headingRegex = /^(#{1,6})\s+(.*)$/gm;
-        const boldRegex = /\*\*(.*?)\*\*/g;
-        const italicRegex = /\*(.*?)\*/g;
-        const codeBlockRegex = /```([\s\S]*?)```/g;
-        const listRegex = /^(\d+\.|[-*])\s+(.*)/gm;
-        const linkRegex = /\[(.*?)\]\((.*?)\)/g;
-        const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
-        const horizontalRuleRegex = /^---+$/gm;
 
-        function handleListItem(match, marker, content) {
-            const isOrdered = marker.endsWith('.');
-            const tag = isOrdered ? 'ol' : 'ul';
-            const item = `<li>${content}</li>`;
-            return `<${tag}>${item}</${tag}>`;
-        }
-
-        text = text.replace(headingRegex, (match, hashes, content) => {
-            const level = hashes.length;
-            return `<h${level}>${content}</h${level}>`;
-        });
-
-        text = text.replace(boldRegex, '<strong>$1</strong>');
-        text = text.replace(italicRegex, '<em>$1</em>');
-        text = text.replace(codeBlockRegex, (match, code) => {
-            const formattedCode = code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return `<pre><code>${formattedCode}</code></pre>`;
-        });
-        text = text.replace(listRegex, handleListItem);
-        text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
-        text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
-        text = text.replace(horizontalRuleRegex, '<hr>');
-        text = text.replace(/\n/g, '<br>');
-
-        return text;
-    }
 
     generateQuizBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
@@ -233,6 +236,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     const chatInput = document.getElementById('chatInput');
     const sendChatBtn = document.getElementById('sendChatBtn');
 
+    let abortController = null;  // To manage aborting the API request
+
     async function handleChatInput() {
         const question = chatInput.value.trim();
         if (!question) return;
@@ -240,60 +245,80 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Clear the input
         chatInput.value = '';
         appendMessage('user', question);
-        sendChatBtn.disabled = true; // Disable the send button while waiting for response
 
-        // Initialize AI session if not already initialized
         if (!aiSession && !(await initAI())) {
             sendChatBtn.disabled = false;
             return;
         }
+
+        sendChatBtn.textContent = 'Stop';
+        sendChatBtn.onclick = stopResponse;
 
         // Make the API call and handle the response
         try {
             await generateChatResponse(question);
         } catch (error) {
             console.error('Error generating response:', error);
-            appendMessage('robot', 'Failed to get response. Please try again.');
+            appendMessage('alert', 'Failed to get response. Please try again.');
         } finally {
             sendChatBtn.disabled = false;
             chatInput.focus();
         }
     }
 
+    function stopResponse() {
+        if (abortController) {
+            abortController.abort();
+            appendMessage('alert', 'Response generation stopped.');
+        }
+        sendChatBtn.textContent = 'Send';
+        sendChatBtn.onclick = handleChatInput;
 
+        abortController = null;
+    }
 
     async function generateChatResponse(userMessage) {
         const prompt = `Human: ${userMessage}\nAI:`;
 
         let response = '';
-        const messageEl = appendMessage('robot', 'Generating...'); // Initial empty message
-        const stream = await aiSession.promptStreaming(prompt);
+        const messageEl = appendMessage('robot', 'Generating...');
 
-        for await (const chunk of stream) {
-            // response = chunk;
-            updateMessageContent(messageEl, convertMarkdownToHTML(chunk)); // Append content instead of replacing
+        abortController = new AbortController();
+        const signal = abortController.signal;
+
+        try {
+            const stream = await aiSession.promptStreaming(prompt, { signal });
+
+            for await (const chunk of stream) {
+                updateMessageContent(messageEl, convertMarkdownToHTML(chunk));
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Request was aborted');
+            } else {
+                console.error('Error during stream:', error);
+            }
         }
-        addCopyButton(messageEl); // Add the copy button once the response is fully loaded
+
+        addCopyButton(messageEl);
         return response.trim();
     }
-
-
 
     // Function to append a new message element
     function appendMessage(role, msg) {
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${role}`;
 
-        const messageContent = document.createElement('span'); // Text content container
-        messageContent.innerHTML = msg; // Using innerHTML to allow for rich content
+        const messageContent = document.createElement('span');
+        messageContent.innerHTML = msg;
 
         messageEl.appendChild(messageContent);
+        chatMessages.style.display = 'block';
         chatMessages.appendChild(messageEl);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
         return messageEl;
     }
-
 
     // Function to update the content of an existing message element
     function updateMessageContent(messageEl, msg) {
@@ -324,7 +349,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleChatInput();
     });
-
 
 });
 
