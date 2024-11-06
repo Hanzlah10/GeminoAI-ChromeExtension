@@ -15,9 +15,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function initAI() {
         try {
             aiSession = await self.ai.languageModel.create({
-                temperature: 1,
-                topK: 4,
-                systemPrompt: "Pretend to be a Tutor"
+                temperature: 0.7,
+                topK: 3,
+                systemPrompt: "Pretend to be a Teacher, you are teaching to a single student"
             });
             return true;
         } catch (error) {
@@ -113,6 +113,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Summarize tab logic
+
+
     const summarizeBtn = document.getElementById('summarizeBtn');
     const summaryResult = document.getElementById('summaryResult');
 
@@ -122,12 +124,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.log('Summary result:', result);
             return result;
         } catch (error) {
-            console.error('Summarization error:', error);
+            console.log('Summarization error:', error);
             summaryResult.innerText = 'Failed to summarize the page. Please try another page or refresh.';
         } finally {
-            // Destroy summarizer to release resources after each use
             if (summarizer) summarizer.destroy();
-            await createSummarizer(); // Re-create summarizer for next usage
+            await createSummarizer();
         }
     }
 
@@ -137,23 +138,41 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            const tabText = await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: () => document.body.innerText,
-            });
 
-            if (!tabText || !tabText[0].result) {
-                throw new Error("Could not retrieve page content");
-            }
+            chrome.scripting.executeScript(
+                {
+                    target: { tabId: tab.id },
+                    function: () => {
+                        // Attempt to fetch the text content from the root element to capture more text
+                        return document.documentElement.innerText || document.body.textContent;
+                    }
+                },
+                async (result) => {
+                    if (chrome.runtime.lastError) {
+                        console.error(chrome.runtime.lastError);
+                        summaryResult.innerText = 'Failed to retrieve page content.';
+                    } else {
+                        const pageText = result[0].result;
+                        if (!pageText) {
+                            summaryResult.innerText = "Content access restricted on this page.";
+                            return;
+                        }
 
-            const pageText = tabText[0].result;
-            const summary = await summarizeText(pageText);
-            summaryResult.innerText = convertMarkdownToHTML(summary);
+                        const summary = await summarizeText(pageText);
+                        summaryResult.innerHTML = convertMarkdownToHTML(summary);
+                        if (summarizer) {
+                            summarizer.destroy();
+                        }
+                    }
+                }
+            );
         } catch (error) {
             console.error('Error generating summary:', error);
             summaryResult.innerText = 'Failed to summarize the page. Please try another page or refresh.';
         }
     });
+
+
 
     // Simplify tab logic
     const simplifyBtn = document.getElementById('simplifyBtn');
@@ -278,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     async function generateChatResponse(userMessage) {
-        const prompt = `Human: ${userMessage}\nAI:`;
+        const prompt = `Student: ${userMessage}\nTeacher:`;
 
         let response = '';
         const messageEl = appendMessage('robot', 'Generating...');
