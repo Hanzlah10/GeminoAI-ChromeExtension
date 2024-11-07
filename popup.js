@@ -65,8 +65,38 @@ document.addEventListener('DOMContentLoaded', async function () {
             return false;
         }
     }
-    await initAI()
 
+    // Function to create and manage the summarizer
+    async function createSummarizer() {
+        try {
+            const canSummarize = await ai.summarizer.capabilities();
+            if (canSummarize && canSummarize.available !== 'no') {
+                if (canSummarize.available === 'readily') {
+                    summarizer = await ai.summarizer.create();
+                } else {
+                    summarizer = await ai.summarizer.create();
+                    summarizer.addEventListener('downloadprogress', (e) => {
+                        console.log(`Download progress: ${e.loaded} of ${e.total}`);
+                    });
+                    await summarizer.ready;
+                }
+                return true;
+            } else {
+                console.warn("Summarizer capabilities unavailable.");
+                errorMessage.textContent = 'Summarization not supported on this device.';
+                errorMessage.style.display = 'block';
+                return false;
+            }
+        } catch (error) {
+            console.error('Error creating summarizer:', error);
+            errorMessage.textContent = 'Failed to initialize summarizer. Some features may be unavailable.';
+            errorMessage.style.display = 'block';
+            return false;
+        }
+    }
+
+    // Try to initialize summarizer, but don't block other features if it fails
+    await createSummarizer();
 
     // Function to convert markup to plain text
     function convertMarkdownToHTML(text) {
@@ -111,37 +141,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-
-    // Function to create and manage the summarizer
-    async function createSummarizer() {
-        try {
-            const canSummarize = await ai.summarizer.capabilities();
-            if (canSummarize && canSummarize.available !== 'no') {
-                if (canSummarize.available === 'readily') {
-                    summarizer = await ai.summarizer.create();
-                } else {
-                    summarizer = await ai.summarizer.create();
-                    summarizer.addEventListener('downloadprogress', (e) => {
-                        console.log(`Download progress: ${e.loaded} of ${e.total}`);
-                    });
-                    await summarizer.ready;
-                }
-                return true;
-            } else {
-                console.warn("Summarizer capabilities unavailable.");
-                errorMessage.textContent = 'Summarization not supported on this device.';
-                errorMessage.style.display = 'block';
-                return false;
-            }
-        } catch (error) {
-            console.error('Error creating summarizer:', error);
-            return false;
-        }
-    }
-
-    // Initialize summarizer before use
-    await createSummarizer();
-
     // Tab switching logic
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -161,8 +160,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function summarizeText(text) {
         if (!summarizer) {
-            console.error("Summarizer is not initialized.");
-            summaryResult.innerText = "Failed to initialize summarizer. Please try again.";
+            console.warn("Summarizer is not initialized.");
+            summaryResult.innerText = "Summarization not supported on this device.";
             return null;
         }
 
@@ -175,7 +174,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             return null;
         }
     }
-
 
     summarizeBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
@@ -221,9 +219,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-
-
-
     // Simplify tab logic
     const simplifyBtn = document.getElementById('simplifyBtn');
     const textToSimplify = document.getElementById('textToSimplify');
@@ -249,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         } catch (error) {
             console.error('Error simplifying text:', error);
-            simplifyResult.innerText = 'Failed to simplify text.';
+            simplifyResult.innerText = 'Failed to simplify the text. Please try again.';
         }
     });
 
