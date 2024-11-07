@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
     await initAI()
 
+
     // Function to convert markup to plain text
     function convertMarkdownToHTML(text) {
         if (text) {
@@ -109,6 +110,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             return " "
         }
     }
+
 
     // Function to create and manage the summarizer
     async function createSummarizer() {
@@ -154,24 +156,26 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Summarize tab logic
-
-
     const summarizeBtn = document.getElementById('summarizeBtn');
     const summaryResult = document.getElementById('summaryResult');
 
     async function summarizeText(text) {
+        if (!summarizer) {
+            console.error("Summarizer is not initialized.");
+            summaryResult.innerText = "Failed to initialize summarizer. Please try again.";
+            return null;
+        }
+
         try {
             const result = await summarizer.summarize(text);
-            console.log('Summary result:', result);
             return result;
         } catch (error) {
             console.log('Summarization error:', error);
-            summaryResult.innerText = 'Failed to summarize the page. Please try another page or refresh.';
-        } finally {
-            if (summarizer) summarizer.destroy();
-            await createSummarizer();
+            summaryResult.innerText = 'Failed to summarize the page. Please try again.';
+            return null;
         }
     }
+
 
     summarizeBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
@@ -180,38 +184,43 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
+            // Execute script to retrieve the page content
             chrome.scripting.executeScript(
                 {
                     target: { tabId: tab.id },
                     function: () => {
                         // Attempt to fetch the text content from the root element to capture more text
-                        return document.documentElement.outerHTML || document.documentElement.innerText || document.body.textContent;
+                        return document.documentElement.innerText || document.documentElement.outerText || document.body.textContent;
                     }
                 },
                 async (result) => {
                     if (chrome.runtime.lastError) {
-                        console.error(chrome.runtime.lastError);
-                        summaryResult.innerText = 'Failed to retrieve page content.';
-                    } else {
-                        const pageText = result[0].result;
-                        if (!pageText) {
-                            summaryResult.innerText = "Content access restricted on this page.";
-                            return;
-                        }
+                        console.error(chrome.runtime.lastError.message);
+                        summaryResult.innerText = 'Failed to retrieve page content. Permission might be restricted.';
+                        return;
+                    }
 
-                        const summary = await summarizeText(pageText);
+                    const pageText = result[0]?.result;
+                    if (!pageText) {
+                        summaryResult.innerText = "Content access restricted on this page.";
+                        return;
+                    }
+
+                    // Summarize the page text
+                    const summary = await summarizeText(pageText);
+                    if (summary) {
                         summaryResult.innerHTML = convertMarkdownToHTML(summary);
-                        if (summarizer) {
-                            summarizer.destroy();
-                        }
+                    } else {
+                        summaryResult.innerText = 'Could not generate summary. Please try again.';
                     }
                 }
             );
         } catch (error) {
             console.error('Error generating summary:', error);
-            summaryResult.innerText = 'Failed to summarize the page. Please try another page or refresh.';
+            summaryResult.innerText = 'An error occurred. Please try another page or refresh.';
         }
     });
+
 
 
 
@@ -250,8 +259,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const quizType = document.getElementById('quizType');
     const quizArea = document.getElementById('quizArea');
 
-
-
     generateQuizBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
         quizArea.innerText = 'Generating quiz...';
@@ -275,17 +282,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             quizArea.innerText = 'Failed to generate quiz.';
         }
     });
-
-
-
-
-
-
-
-
-
-
-
 
 
 
