@@ -65,9 +65,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             return false;
         }
     }
-
-
-
+    await initAI()
 
     // Function to convert markup to plain text
     function convertMarkdownToHTML(text) {
@@ -187,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     target: { tabId: tab.id },
                     function: () => {
                         // Attempt to fetch the text content from the root element to capture more text
-                        return document.documentElement.innerText || document.body.textContent;
+                        return document.documentElement.outerHTML || document.documentElement.innerText || document.body.textContent;
                     }
                 },
                 async (result) => {
@@ -238,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             for await (const chunk of stream) {
                 response = chunk.trim();
-                simplifyResult.innerText = convertMarkdownToHTML(response);
+                simplifyResult.innerHTML = convertMarkdownToHTML(response);
             }
         } catch (error) {
             console.error('Error simplifying text:', error);
