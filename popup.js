@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const chatInput = document.getElementById('chatInput');
     const sendChatBtn = document.getElementById('sendChatBtn');
 
-    let abortController = null;  // To manage aborting the API request
+    let abortController = null; // To manage aborting the API request
 
     async function handleChatInput() {
         const question = chatInput.value.trim();
@@ -311,6 +311,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
+        // Set the button to "Stop" while processing
         sendChatBtn.textContent = 'Stop';
         sendChatBtn.onclick = stopResponse;
 
@@ -321,20 +322,25 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.error('Error generating response:', error);
             appendMessage('alert', 'Failed to get response. Please try again.');
         } finally {
-            sendChatBtn.disabled = false;
+            // Reset the button back to "Send"
+            resetSendButton();
             chatInput.focus();
         }
     }
 
     function stopResponse() {
         if (abortController) {
-            abortController.abort();
+            abortController.abort(); // Abort the current request
             appendMessage('alert', 'Response generation stopped.');
         }
+        resetSendButton();
+    }
+
+    function resetSendButton() {
         sendChatBtn.textContent = 'Send';
         sendChatBtn.onclick = handleChatInput;
-
-        abortController = null;
+        sendChatBtn.disabled = false;
+        abortController = null; // Reset the abort controller for the next question
     }
 
     async function generateChatResponse(userMessage) {
@@ -349,18 +355,24 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
             const stream = await aiSession.promptStreaming(prompt, { signal });
 
+            // Process each chunk from the stream
             for await (const chunk of stream) {
-                updateMessageContent(messageEl, convertMarkdownToHTML(chunk));
+                response = chunk;
+                updateMessageContent(messageEl, convertMarkdownToHTML(response));
             }
+
+            addCopyButton(messageEl); // Add a copy button after the full response is received
         } catch (error) {
             if (error.name === 'AbortError') {
                 console.log('Request was aborted');
             } else {
                 console.error('Error during stream:', error);
+                appendMessage('alert', 'An error occurred while generating the response.');
             }
+        } finally {
+            abortController = null; // Ensure the abort controller is reset after completion
         }
 
-        addCopyButton(messageEl);
         return response.trim();
     }
 
@@ -411,5 +423,4 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
 });
-
 
