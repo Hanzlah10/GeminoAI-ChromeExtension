@@ -1,17 +1,57 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const errorMessage = document.getElementById('error-message');
-
-    // Check if AI API is available
-    if (!self.ai?.languageModel) {
-        errorMessage.textContent = "This extension requires Chrome's AI features. Please enable them in chrome://flags/#enable-web-ai";
-        errorMessage.style.display = 'block';
-        return;
-    }
+    const toggleExtensionBtn = document.getElementById('toggleExtension');
+    const extensionContent = document.getElementById('extensionContent');
 
     let aiSession = null;
     let summarizer = null;
+    let extensionActive = false;
 
-    // Initialize AI session
+    // Start the extension
+    async function startExtension() {
+        if (!self.ai?.languageModel) {
+            errorMessage.textContent = "This extension requires Chrome's AI features. Please enable them in chrome://flags/#enable-web-ai";
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        // Initialize AI session
+        const sessionInitialized = await initAI();
+        if (sessionInitialized) {
+            extensionContent.style.display = 'block';
+            toggleExtensionBtn.textContent = 'ON';
+            extensionActive = true;
+        } else {
+            errorMessage.textContent = 'Failed to initialize AI session. Please try again.';
+            errorMessage.style.display = 'block';
+        }
+    }
+
+    // Stop the extension
+    async function stopExtension() {
+        if (aiSession) {
+            aiSession.destroy(); // Destroy AI session
+            aiSession = null;
+        }
+        if (summarizer) {
+            summarizer.destroy(); // Destroy summarizer if active
+            summarizer = null;
+        }
+        extensionContent.style.display = 'none';
+        toggleExtensionBtn.textContent = 'OFF';
+        extensionActive = false;
+    }
+
+    // Toggle button event listener
+    toggleExtensionBtn.addEventListener('click', async () => {
+        if (extensionActive) {
+            await stopExtension();
+        } else {
+            await startExtension();
+        }
+    });
+
+    // Initialize AI session function
     async function initAI() {
         try {
             aiSession = await self.ai.languageModel.create({
@@ -22,19 +62,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             return true;
         } catch (error) {
             console.error('AI initialization error:', error);
-            errorMessage.textContent = 'Failed to initialize AI features. Please try again.';
-            errorMessage.style.display = 'block';
             return false;
         }
     }
 
-    // Initialize AI session
-    await initAI();
 
 
 
-
-    // Function to convert markup to plain text with styling
+    // Function to convert markup to plain text
     function convertMarkdownToHTML(text) {
         if (text) {
             const headingRegex = /^(#{1,6})\s+(.*)$/gm;

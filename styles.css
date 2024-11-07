@@ -10,9 +10,39 @@
     --btn-hover-bg: #0056b3;
     --btn-disabled-bg: #6c757d;
 }
+
 ul, ol {
 margin: 0;
 padding: 0;
+}
+
+.Top{
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    padding: 10px 20px;
+    gap: 150px;
+}
+
+.toggle-btn{
+    background-color: #1944b2;
+    color: white;
+    border: none;
+    width: 100px;
+    padding: 10px 10px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.toggle-btn:hover {
+    background-color: var(--primary-hover-color);
+    transform: scale(1.05);
+}
+
+.toggle-btn:active {
+    background-color: var(--btn-hover-bg);
+    transform: scale(0.95);
 }
 
 ul li, ol li {
@@ -30,6 +60,7 @@ body {
     margin: 0;
     padding: 16px;
 }
+
 
 
 .container {
@@ -136,6 +167,7 @@ select {
     cursor: pointer;
     transition: background 0.3s;
 }
+
 
 .primary-btn:hover {
     background-color: var(--primary-hover-color);

@@ -11,78 +11,86 @@
 
 <body>
     <div class="container">
+        <!-- <button id="toggleExtension">OFF</button> -->
         <div id="error-message" style="display: none;" class="error-alert"></div>
 
-        <header>
+        <header class="Top">
             <h1>Learning Coach</h1>
+            <button id="toggleExtension" class="toggle-btn">OFF</button>
         </header>
+        <div id="extensionContent" style="display: none;">
 
-        <nav class="feature-tabs">
-            <button class="tab-btn active" data-tab="summarize">Summarize</button>
-            <button class="tab-btn" data-tab="simplify">Simplify</button>
-            <button class="tab-btn" data-tab="quiz">Quiz</button>
-            <button class="tab-btn" data-tab="chat">Chat</button> <!-- Chat Tab -->
-        </nav>
+            <nav class="feature-tabs">
+                <button class="tab-btn active" data-tab="summarize">Summarize</button>
+                <button class="tab-btn" data-tab="simplify">Simplify</button>
+                <button class="tab-btn" data-tab="quiz">Quiz</button>
+                <button class="tab-btn" data-tab="chat">Chat</button> <!-- Chat Tab -->
+            </nav>
 
-        <main class="content">
-            <!-- Summarize Tab -->
-            <section id="summarize" class="tab-content active">
-                <div class="action-panel">
-                    <button id="summarizeBtn" class="primary-btn">Summarize Current Page</button>
-                </div>
-                <div id="summaryResult" class="result-area">
-                    <div class="placeholder">Click button to summarize current page</div>
-                </div>
-            </section>
-
-            <!-- Simplify Tab -->
-            <section id="simplify" class="tab-content">
-                <div class="action-panel">
-                    <textarea id="textToSimplify" placeholder="Paste text to simplify..."></textarea>
-                    <div class="button-row">
-                        <select id="simplificationLevel">
-                            <option value="basic">Basic Simplification</option>
-                            <option value="technical">Technical Simplification</option>
-                        </select>
-                        <button id="simplifyBtn" class="primary-btn">Simplify</button>
+            <main class="content">
+                <!-- Summarize Tab -->
+                <section id="summarize" class="tab-content active">
+                    <div class="action-panel">
+                        <button id="summarizeBtn" class="primary-btn">Summarize Current Page</button>
                     </div>
-                </div>
-                <div id="simplifyResult" class="result-area"></div>
-            </section>
-
-            <!-- Quiz Tab -->
-            <section id="quiz" class="tab-content">
-                <div class="action-panel">
-                    <div class="button-row">
-                        <select id="quizType">
-                            <option value="multiChoice">Multiple Choice</option>
-                            <option value="fillBlank">Fill in the Blank</option>
-                            <option value="truefalse">True/False</option>
-                        </select>
-                        <button id="generateQuizBtn" class="primary-btn">Generate Quiz</button>
+                    <div id="summaryResult" class="result-area">
+                        <div class="placeholder">Click button to summarize current page</div>
                     </div>
-                </div>
-                <div id="quizArea" class="result-area">
-                    <div class="placeholder">Select quiz type and click generate</div>
-                </div>
-            </section>
+                </section>
 
-
-            <!-- Chat Tab  -->
-            <section id="chat" class="tab-content">
-                <div class="chat-container">
-                    <div id="chatMessages" style="display: none;" class="chat-messages"></div>
-                    <div class="chat-input">
-                        <input type="text" id="chatInput" placeholder="Type your message here..." />
-                        <button id="sendChatBtn" class="primary-btn">Send</button>
+                <!-- Simplify Tab -->
+                <section id="simplify" class="tab-content">
+                    <div class="action-panel">
+                        <textarea id="textToSimplify" placeholder="Paste text to simplify..."></textarea>
+                        <div class="button-row">
+                            <select id="simplificationLevel">
+                                <option value="basic">Basic Simplification</option>
+                                <option value="technical">Technical Simplification</option>
+                            </select>
+                            <button id="simplifyBtn" class="primary-btn">Simplify</button>
+                        </div>
                     </div>
-                </div>
-            </section>
+                    <div id="simplifyResult" class="result-area"></div>
+                </section>
+
+                <!-- Quiz Tab -->
+                <section id="quiz" class="tab-content">
+                    <div class="action-panel">
+                        <div class="button-row">
+                            <select id="quizType">
+                                <option value="multiChoice">Multiple Choice</option>
+                                <option value="fillBlank">Fill in the Blank</option>
+                                <option value="truefalse">True/False</option>
+                            </select>
+                            <button id="generateQuizBtn" class="primary-btn">Generate Quiz</button>
+                        </div>
+                    </div>
+                    <div id="quizArea" class="result-area">
+                        <div class="placeholder">Select quiz type and click generate</div>
+                    </div>
+                </section>
+
+
+                <!-- Chat Tab  -->
+                <section id="chat" class="tab-content">
+                    <div class="chat-container">
+                        <div id="chatMessages" style="display: none;" class="chat-messages"></div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput" placeholder="Type your message here..." />
+                            <button id="sendChatBtn" class="primary-btn">Send</button>
+                        </div>
+                    </div>
+                </section>
 
 
 
-        </main>
+            </main>
+        </div>
+
     </div>
+
+
+
     <script src="popup.js"></script>
 
 </body>
