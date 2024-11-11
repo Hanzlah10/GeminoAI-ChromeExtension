@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning Coach</title>
+    <title>Built-in AI</title>
     <link rel="stylesheet" href="styles.css">
 
 </head>
@@ -15,21 +15,32 @@
         <div id="error-message" style="display: none;" class="error-alert"></div>
 
         <header class="Top">
-            <h1>Learning Coach</h1>
+            <h1>Built-in AI Extension</h1>
             <button id="toggleExtension" class="toggle-btn">OFF</button>
         </header>
         <div id="extensionContent" style="display: none;">
 
             <nav class="feature-tabs">
-                <button class="tab-btn active" data-tab="summarize">Summarize</button>
+                <button class="tab-btn active" data-tab="chat">Chat</button> <!-- Chat Tab -->
+                <button class="tab-btn " data-tab="summarize">Summarize</button>
                 <button class="tab-btn" data-tab="simplify">Simplify</button>
                 <button class="tab-btn" data-tab="quiz">Quiz</button>
-                <button class="tab-btn" data-tab="chat">Chat</button> <!-- Chat Tab -->
             </nav>
 
             <main class="content">
+                <!-- Chat Tab  -->
+                <section id="chat" class="tab-content active">
+                    <div class="chat-container">
+                        <div id="chatMessages" style="display: none;" class="chat-messages"></div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput" placeholder="Type your message here..." />
+                            <button id="sendChatBtn" class="primary-btn">Send</button>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Summarize Tab -->
-                <section id="summarize" class="tab-content active">
+                <section id="summarize" class="tab-content ">
                     <div class="action-panel">
                         <button id="summarizeBtn" class="primary-btn">Summarize Current Page</button>
                     </div>
@@ -71,16 +82,7 @@
                 </section>
 
 
-                <!-- Chat Tab  -->
-                <section id="chat" class="tab-content">
-                    <div class="chat-container">
-                        <div id="chatMessages" style="display: none;" class="chat-messages"></div>
-                        <div class="chat-input">
-                            <input type="text" id="chatInput" placeholder="Type your message here..." />
-                            <button id="sendChatBtn" class="primary-btn">Send</button>
-                        </div>
-                    </div>
-                </section>
+
 
 
 

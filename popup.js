@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             aiSession = await self.ai.languageModel.create({
                 temperature: 0.7,
                 topK: 3,
-                systemPrompt: "Pretend to be a Teacher, you are teaching to a single student"
+                systemPrompt: "You are my personal assistant, and your role is to help me stay organized, productive, and informed by giving me short and concise answers. I may ask you for help with tasks such as scheduling, reminders, planning, research, or learning new things. When I ask questions, please respond with clear, concise and short answers. If I need guidance on a topic, break it down into actionable steps. Keep a polite and professional tone but add a friendly, supportive touch. If I forget something I’ve previously mentioned, remind me of any relevant information to make things easier. Your goal is to help me achieve my personal and professional goals efficiently."
             });
             return true;
         } catch (error) {
@@ -96,61 +96,68 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Try to initialize summarizer, but don't block other features if it fails
-    await createSummarizer();
+    // await createSummarizer();
 
     // Function to convert markup to plain text
     function convertMarkdownToHTML(text) {
-        if (text) {
-            const headingRegex = /^(#{1,6})\s+(.*)$/gm;
-            const boldRegex = /\*\*(.*?)\*\*/g;
-            const italicRegex = /\*(.*?)\*/g;
-            const codeBlockRegex = /```([\s\S]*?)```/g;
-            const listRegex = /^(\d+\.|[-*])\s+(.*)/gm;
-            const linkRegex = /\[(.*?)\]\((.*?)\)/g;
-            const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
-            const horizontalRuleRegex = /^---+$/gm;
+        if (!text) return " ";
 
-            function handleListItem(match, marker, content) {
-                const isOrdered = marker.endsWith('.');
-                const tag = isOrdered ? 'ol' : 'ul';
-                const item = `<li>${content}</li>`;
-                return `<${tag}>${item}</${tag}>`;
-            }
+        const headingRegex = /^(#{1,6})\s+(.*)$/gm;
+        const boldRegex = /\*\*(.*?)\*\*/g;
+        const italicRegex = /\*(.*?)\*/g;
+        const codeBlockRegex = /```([\s\S]*?)```/g;
+        const listItemRegex = /^(\d+\.\s+|[-*]\s+)(.*)/gm;
+        const linkRegex = /\[(.*?)\]\((.*?)\)/g;
+        const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+        const horizontalRuleRegex = /^---+$/gm;
 
-            text = text.replace(headingRegex, (match, hashes, content) => {
-                const level = hashes.length;
-                return `<h${level}>${content}</h${level}>`;
-            });
+        // Process headings
+        text = text.replace(headingRegex, (match, hashes, content) => {
+            const level = hashes.length;
+            return `<h${level}>${content}</h${level}>`;
+        });
 
-            text = text.replace(boldRegex, '<strong>$1</strong>');
-            text = text.replace(italicRegex, '<em>$1</em>');
-            text = text.replace(codeBlockRegex, (match, code) => {
-                const formattedCode = code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                return `<pre><code>${formattedCode}</code></pre>`;
-            });
-            text = text.replace(listRegex, handleListItem);
-            text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
-            text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
-            text = text.replace(horizontalRuleRegex, '<hr>');
-            text = text.replace(/\n/g, '<br>');
+        // Process bold, italic, and code blocks
+        text = text.replace(boldRegex, '<strong>$1</strong>');
+        text = text.replace(italicRegex, '<em>$1</em>');
+        text = text.replace(codeBlockRegex, (match, code) => {
+            const formattedCode = code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return `<pre><code>${formattedCode}</code></pre>`;
+        });
 
-            return text;
-        }
-        else {
-            return " "
-        }
+        // Process unordered lists
+        text = text.replace(listItemRegex, (match, marker, content) => {
+            return `<ul><li>${content}</li></ul>`;
+        });
+
+        // Process links, images, and horizontal rules
+        text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
+        text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
+        text = text.replace(horizontalRuleRegex, '<hr>');
+
+        // Add line breaks for new lines that are not part of other HTML elements
+        text = text.replace(/\n(?!<\/?(ul|li|h\d|pre|code|hr|a|img))/g, '<br>');
+
+        // Merge consecutive `<ul></ul>` tags into one list
+        text = text.replace(/<\/ul>\s*<ul>/g, '');
+
+        return text;
     }
+
 
     // Tab switching logic
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
     tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             const tabName = btn.dataset.tab;
             tabBtns.forEach(b => b.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById(tabName).classList.add('active');
+            if (tabName == 'summarize') {
+                await createSummarizer();
+            }
         });
     });
 
