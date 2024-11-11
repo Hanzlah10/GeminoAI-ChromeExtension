@@ -16,7 +16,8 @@ Chrome’s AI APIs let you access powerful models directly in the browser for ta
 ## How to Use:
 
 1. Install the extension.
-2. Type your prompt and get instant responses.
-3. Adjust settings for different conversation styles.
+2. Enable Chrome's Built-in AI APIs from the chrome settings.
+3. Type your prompt and get instant responses.
+4. Adjust settings for different conversation styles.
 
 Enjoy chatting with AI right in your browser! 💬✨
