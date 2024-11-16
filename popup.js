@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     // Retrieve the saved theme from localStorage on page load
-    const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to 'light' if no theme is set
+    const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to 'dark' if no theme is set
     html.setAttribute('data-theme', savedTheme);
     updateThemeToggleIcon(savedTheme);
 
