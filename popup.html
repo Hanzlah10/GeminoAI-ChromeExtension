@@ -1,100 +1,181 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Built-in AI</title>
     <link rel="stylesheet" href="styles.css">
-
 </head>
 
 <body>
     <div class="container">
-        <div id="loading-spinner" style="display: none;" class="loading-spinner"></div>
-        <div id="error-message" style="display: none;" class="error-alert"></div>
+        <div id="error-message" class="error-alert" style="display: none;"></div>
 
-        <header class="Top">
-            <h1>Built-in AI Extension</h1>
-            <button id="toggleExtension" class="toggle-btn">OFF</button>
+        <header class="app-header">
+
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <h1>Built-in AI</h1>
+            </div>
+            <div class="header-controls">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+                <button id="toggleExtension" class="toggle-btn">
+                    <span class="toggle-text">OFF</span>
+                    <span class="toggle-indicator "></span>
+                </button>
+            </div>
         </header>
+
+        <div id="loading-spinner-wrap" class="loading-spinner-wrapper" style="display: none;">
+            <div id="loading-spinner" class="loading-spinner"></div>
+        </div>
+
         <div id="extensionContent" style="display: none;">
 
             <nav class="feature-tabs">
-                <button class="tab-btn active" data-tab="chat">Chat</button> <!-- Chat Tab -->
-                <button class="tab-btn " data-tab="summarize">Summarize</button>
-                <button class="tab-btn" data-tab="simplify">Simplify</button>
-                <button class="tab-btn" data-tab="quiz">Quiz</button>
+                <button class="tab-btn active" data-tab="chat">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Chat
+                </button>
+                <button class="tab-btn" data-tab="summarize">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Summarize
+                </button>
+                <button class="tab-btn" data-tab="simplify">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Simplify
+                </button>
+                <button class="tab-btn" data-tab="quiz">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    Quiz
+                </button>
             </nav>
 
             <main class="content">
-                <!-- Chat Tab  -->
                 <section id="chat" class="tab-content active">
                     <div class="chat-container">
-                        <div id="chatMessages" style="display: none;" class="chat-messages"></div>
-                        <div class="chat-input">
-                            <input type="text" id="chatInput" placeholder="Type your message here..." />
-                            <button id="sendChatBtn" class="primary-btn">Send</button>
+                        <div id="chatMessages" class="chat-messages"></div>
+                        <div class="chat-input-container">
+                            <div class="chat-input-wrapper">
+                                <input type="text" id="chatInput" placeholder="Type your message here..." />
+                                <button id="sendChatBtn" class="send-button">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Summarize Tab -->
-                <section id="summarize" class="tab-content ">
+                <section id="summarize" class="tab-content">
                     <div class="action-panel">
-                        <button id="summarizeBtn" class="primary-btn">Summarize Current Page</button>
+                        <button id="summarizeBtn" class="primary-btn">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <polyline points="16 6 12 2 8 6" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Summarize Current Page
+                        </button>
                     </div>
                     <div id="summaryResult" class="result-area">
                         <div class="placeholder">Click button to summarize current page</div>
                     </div>
                 </section>
 
-                <!-- Simplify Tab -->
                 <section id="simplify" class="tab-content">
                     <div class="action-panel">
                         <textarea id="textToSimplify" placeholder="Paste text to simplify..."></textarea>
                         <div class="button-row">
-                            <select id="simplificationLevel">
+                            <select id="simplificationLevel" class="select-input">
                                 <option value="basic">Basic Simplification</option>
                                 <option value="technical">Technical Simplification</option>
                             </select>
-                            <button id="simplifyBtn" class="primary-btn">Simplify</button>
+                            <button id="simplifyBtn" class="primary-btn">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M4 4l5 5" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Simplify
+                            </button>
                         </div>
                     </div>
                     <div id="simplifyResult" class="result-area"></div>
                 </section>
 
-                <!-- Quiz Tab -->
                 <section id="quiz" class="tab-content">
                     <div class="action-panel">
                         <div class="button-row">
-                            <select id="quizType">
+                            <select id="quizType" class="select-input">
                                 <option value="multiChoice">Multiple Choice</option>
                                 <option value="fillBlank">Fill in the Blank</option>
                                 <option value="truefalse">True/False</option>
                             </select>
-                            <button id="generateQuizBtn" class="primary-btn">Generate Quiz</button>
+                            <button id="generateQuizBtn" class="primary-btn">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Generate Quiz
+                            </button>
                         </div>
                     </div>
                     <div id="quizArea" class="result-area">
                         <div class="placeholder">Select quiz type and click generate</div>
                     </div>
                 </section>
-
-
-
-
-
-
             </main>
         </div>
-
     </div>
-
-
-
     <script src="popup.js"></script>
-
 </body>
 
 </html>

@@ -2,38 +2,50 @@ document.addEventListener('DOMContentLoaded', async function () {
     const errorMessage = document.getElementById('error-message');
     const toggleExtensionBtn = document.getElementById('toggleExtension');
     const extensionContent = document.getElementById('extensionContent');
-    const loadingSpinner = document.getElementById('loading-spinner');
+    const loadingSpinner = document.getElementById('loading-spinner-wrap');
     let aiSession = null;
     let summarizer = null;
     let extensionActive = false;
 
+
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', newTheme);
+
+        // Update theme toggle icon
+        themeToggle.innerHTML = newTheme === 'light'
+            ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>';
+    });
+
+    // Start the Extension
     async function startExtension() {
         if (!self.ai?.languageModel) {
             errorMessage.textContent = "This extension requires Chrome's AI features. Please enable them in chrome://flags/#enable-web-ai";
             errorMessage.style.display = 'block';
             return;
         }
-
         // Show the loading spinner
-        loadingSpinner.style.display = 'block';
+        loadingSpinner.style.display = 'flex';
         errorMessage.style.display = 'none';
-
         // Initialize AI session
         const sessionInitialized = await initAI();
-
         // Hide the loading spinner
         loadingSpinner.style.display = 'none';
-
         if (sessionInitialized) {
             extensionContent.style.display = 'block';
-            toggleExtensionBtn.textContent = 'ON';
+            toggleExtensionBtn.querySelector('.toggle-text').textContent = 'ON';  // Update just the text span
+            toggleExtensionBtn.classList.add('active');
             extensionActive = true;
         } else {
             errorMessage.textContent = 'Failed to initialize AI session. Please try again.';
             errorMessage.style.display = 'block';
         }
     }
-
 
     // Stop the extension
     async function stopExtension() {
@@ -46,7 +58,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             summarizer = null;
         }
         extensionContent.style.display = 'none';
-        toggleExtensionBtn.textContent = 'OFF';
+        toggleExtensionBtn.querySelector('.toggle-text').textContent = 'OFF';  // Update just the text span
+        toggleExtensionBtn.classList.remove('active');
         extensionActive = false;
     }
 
@@ -58,6 +71,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             await startExtension();
         }
     });
+
+
 
     // Initialize AI session function
     async function initAI() {
@@ -156,17 +171,37 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Tab switching logic
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
+
     tabBtns.forEach(btn => {
-        btn.addEventListener('click', async () => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
             const tabName = btn.dataset.tab;
+
+            // Remove active class from all buttons and contents
             tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
+            tabContents.forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none';
+            });
+
+            // Add active class to clicked button and corresponding content
             btn.classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-            if (tabName == 'summarize') {
+            const activeContent = document.getElementById(tabName);
+            activeContent.classList.add('active');
+            activeContent.style.display = 'block';
+
+            // Handle summarizer initialization if needed
+            if (tabName === 'summarize') {
                 await createSummarizer();
             }
         });
+    });
+
+    // Additional styles for tab content visibility
+    document.querySelectorAll('.tab-content').forEach(content => {
+        if (!content.classList.contains('active')) {
+            content.style.display = 'none';
+        }
     });
 
     // Summarize tab logic
@@ -297,12 +332,26 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     //Chat Functionality
-
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const sendChatBtn = document.getElementById('sendChatBtn');
 
     let abortController = null; // To manage aborting the API request
+
+    // Utility function for copy icon SVG
+    function createCopyButton() {
+        const copyButton = document.createElement('button');
+        copyButton.className = 'copy-button';
+        copyButton.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+        `;
+        copyButton.setAttribute('title', 'Copy to clipboard');
+        return copyButton;
+    }
+
 
     async function handleChatInput() {
         const question = chatInput.value.trim();
@@ -321,14 +370,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         sendChatBtn.textContent = 'Stop';
         sendChatBtn.onclick = stopResponse;
 
-        // Make the API call and handle the response
         try {
             await generateChatResponse(question);
         } catch (error) {
             console.error('Error generating response:', error);
             appendMessage('alert', 'Failed to get response. Please try again.');
         } finally {
-            // Reset the button back to "Send"
             resetSendButton();
             chatInput.focus();
         }
@@ -336,22 +383,26 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function stopResponse() {
         if (abortController) {
-            abortController.abort(); // Abort the current request
+            abortController.abort();
             appendMessage('alert', 'Response generation stopped.');
         }
         resetSendButton();
     }
 
     function resetSendButton() {
-        sendChatBtn.textContent = 'Send';
+        sendChatBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    `;
         sendChatBtn.onclick = handleChatInput;
         sendChatBtn.disabled = false;
-        abortController = null; // Reset the abort controller for the next question
+        abortController = null;
     }
 
     async function generateChatResponse(userMessage) {
-        const prompt = `Student: ${userMessage}\nTeacher:`;
-
+        const prompt = userMessage;
         let response = '';
         const messageEl = appendMessage('robot', 'Generating...');
 
@@ -361,13 +412,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
             const stream = await aiSession.promptStreaming(prompt, { signal });
 
-            // Process each chunk from the stream
             for await (const chunk of stream) {
                 response = chunk;
                 updateMessageContent(messageEl, convertMarkdownToHTML(response));
             }
-
-            addCopyButton(messageEl); // Add a copy button after the full response is received
+            // Add copy button after response is complete
+            addCopyButton(messageEl);
         } catch (error) {
             if (error.name === 'AbortError') {
                 console.log('Request was aborted');
@@ -376,19 +426,67 @@ document.addEventListener('DOMContentLoaded', async function () {
                 appendMessage('alert', 'An error occurred while generating the response.');
             }
         } finally {
-            abortController = null; // Ensure the abort controller is reset after completion
+            abortController = null;
         }
 
         return response.trim();
     }
+    function addCopyButton(messageEl) {
+        const copyButton = createCopyButton();
 
-    // Function to append a new message element
+        copyButton.addEventListener('click', async () => {
+            try {
+                const textToCopy = messageEl.querySelector('.message-content').textContent;
+                await navigator.clipboard.writeText(textToCopy);
+
+                // Show success state
+                copyButton.classList.add('copied');
+                copyButton.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                `;
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyButton.classList.remove('copied');
+                    copyButton.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    `;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        });
+
+        messageEl.appendChild(copyButton);
+    }
+
+
+    // Updated appendMessage function
     function appendMessage(role, msg) {
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${role}`;
 
-        const messageContent = document.createElement('span');
-        messageContent.innerHTML = msg;
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+
+        if (role === 'robot' && msg === 'Generating...') {
+            messageContent.innerHTML = `
+            <div class="loading-container">
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        `;
+        } else {
+            messageContent.innerHTML = msg;
+        }
 
         messageEl.appendChild(messageContent);
         chatMessages.style.display = 'block';
@@ -398,35 +496,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         return messageEl;
     }
 
-    // Function to update the content of an existing message element
     function updateMessageContent(messageEl, msg) {
-        const messageContent = messageEl.querySelector('span');
+        const messageContent = messageEl.querySelector('.message-content');
         messageContent.innerHTML = msg;
     }
 
-    // Function to add a copy button to each robot message
-    function addCopyButton(messageEl) {
-        const copyBtn = document.createElement('button');
-        copyBtn.innerText = 'Copy';
-        copyBtn.className = 'copy-btn';
-        copyBtn.onclick = () => copyToClipboard(messageEl.querySelector('span').innerText);
-
-        messageEl.appendChild(copyBtn);
-    }
-
-    // Copy text to clipboard
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Response copied to clipboard!');
-        }).catch((error) => {
-            console.error('Failed to copy text:', error);
-        });
-    }
-
+    // Event Listeners
     sendChatBtn.addEventListener('click', handleChatInput);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleChatInput();
     });
-
 });
 
