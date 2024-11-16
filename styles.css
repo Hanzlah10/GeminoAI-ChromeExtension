@@ -302,6 +302,24 @@ body {
 }
 
 /* Copy button specific styles */
+.copy-button {
+    opacity: 1;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 28px;
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+}
 #chat .copy-button {
     opacity: 1;
     background: transparent;
@@ -321,16 +339,13 @@ body {
     bottom: -4px;
 }
 
-/* #chat .chat-message:hover .copy-button {
-    opacity: 1;
-} */
 
-#chat .copy-button:hover {
+.copy-button:hover {
     background-color: var(--bg-tertiary);
     color: var(--text-primary);
 }
 
-#chat .copy-button.copied {
+.copy-button.copied {
     color: var(--success-color);
 }
 

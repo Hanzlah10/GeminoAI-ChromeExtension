@@ -242,18 +242,16 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     summarizeBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
+
         summaryResult.innerHTML = `
-        <div class="loading-container">
-            <div class="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
+            <div class="loading-container">
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
-        </div>
-    `;
-
-
-
+        `;
 
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -283,7 +281,16 @@ document.addEventListener('DOMContentLoaded', async function () {
                     // Summarize the page text
                     const summary = await summarizeText(pageText);
                     if (summary) {
-                        summaryResult.innerHTML = convertMarkdownToHTML(summary);
+                        // Display the summary
+                        summaryResult.innerHTML = `
+                            <div class="summary-content">
+                                <div class="message-content">${convertMarkdownToHTML(summary)}</div>
+                            </div>
+                        `;
+
+                        // Add the copy button
+                        const summaryContentEl = summaryResult.querySelector('.summary-content');
+                        addCopyButton(summaryContentEl);
                     } else {
                         summaryResult.innerText = 'Could not generate summary. Please try again.';
                     }
@@ -294,6 +301,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             summaryResult.innerText = 'An error occurred. Please try another page or refresh.';
         }
     });
+
 
     // Simplify tab logic
     const simplifyBtn = document.getElementById('simplifyBtn');
@@ -353,9 +361,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             quizArea.innerText = 'Failed to generate quiz.';
         }
     });
-
-
-
 
     //Chat Functionality
     const chatMessages = document.getElementById('chatMessages');
