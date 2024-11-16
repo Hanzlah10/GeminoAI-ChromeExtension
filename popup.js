@@ -2,12 +2,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     const errorMessage = document.getElementById('error-message');
     const toggleExtensionBtn = document.getElementById('toggleExtension');
     const extensionContent = document.getElementById('extensionContent');
-
+    const loadingSpinner = document.getElementById('loading-spinner');
     let aiSession = null;
     let summarizer = null;
     let extensionActive = false;
 
-    // Start the extension
     async function startExtension() {
         if (!self.ai?.languageModel) {
             errorMessage.textContent = "This extension requires Chrome's AI features. Please enable them in chrome://flags/#enable-web-ai";
@@ -15,8 +14,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
+        // Show the loading spinner
+        loadingSpinner.style.display = 'block';
+        errorMessage.style.display = 'none';
+
         // Initialize AI session
         const sessionInitialized = await initAI();
+
+        // Hide the loading spinner
+        loadingSpinner.style.display = 'none';
+
         if (sessionInitialized) {
             extensionContent.style.display = 'block';
             toggleExtensionBtn.textContent = 'ON';
@@ -26,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             errorMessage.style.display = 'block';
         }
     }
+
 
     // Stop the extension
     async function stopExtension() {
