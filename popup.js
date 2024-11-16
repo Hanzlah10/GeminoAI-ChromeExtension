@@ -7,10 +7,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     let summarizer = null;
     let extensionActive = false;
 
-
     const themeToggle = document.getElementById('themeToggle');
     const html = document.documentElement;
-
 
     // Retrieve the saved theme from localStorage on page load
     const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to 'dark' if no theme is set
@@ -241,9 +239,21 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+
     summarizeBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
-        summaryResult.innerText = 'Summarizing...';
+        summaryResult.innerHTML = `
+        <div class="loading-container">
+            <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+
+
+
 
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
