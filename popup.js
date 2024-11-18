@@ -768,7 +768,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                 </div>
             </div>
         `;
-        } else {
+        }
+        else if (role === 'alert') {
+            messageContent.innerHTML = `<div class ="msg-error-alert" >Alert: ${msg} </div> `;
+        }
+        else {
             messageContent.innerHTML = msg;
         }
 
