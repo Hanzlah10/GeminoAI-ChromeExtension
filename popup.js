@@ -137,46 +137,96 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Function to convert markup to plain text
     function convertMarkdownToHTML(text) {
-        if (!text) return " ";
+        if (!text) return "";
 
-        const headingRegex = /^(#{1,6})\s+(.*)$/gm;
-        const boldRegex = /\*\*(.*?)\*\*/g;
-        const italicRegex = /\*(.*?)\*/g;
-        const codeBlockRegex = /```([\s\S]*?)```/g;
-        const listItemRegex = /^(\d+\.\s+|[-*]\s+)(.*)/gm;
-        const linkRegex = /\[(.*?)\]\((.*?)\)/g;
-        const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
-        const horizontalRuleRegex = /^---+$/gm;
+        // First, we'll preserve code blocks by temporarily replacing them
+        const codeBlocks = [];
+        let codeBlockCounter = 0;
 
-        // Process headings
-        text = text.replace(headingRegex, (match, hashes, content) => {
+        // Handle both fenced code blocks with language specification and without
+        text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language, code) => {
+            const placeholder = `___CODE_BLOCK_${codeBlockCounter}___`;
+            codeBlocks.push({
+                code: code.trim(),
+                language: language || ''
+            });
+            codeBlockCounter++;
+            return placeholder;
+        });
+
+        // Regular expression patterns
+        const patterns = {
+            heading: /^(#{1,6})\s+(.*)$/gm,
+            bold: /\*\*(.*?)\*\*/g,
+            italic: /\*(.*?)\*/g,
+            listItem: /^(\s*)([-*]|\d+\.)\s+(.*)$/gm,
+            link: /\[(.*?)\]\((.*?)\)/g,
+            image: /!\[(.*?)\]\((.*?)\)/g,
+            horizontalRule: /^---+$/gm,
+            inlineCode: /`([^`]+)`/g
+        };
+
+        // Process basic markdown elements
+        text = text
+            .replace(patterns.bold, '<strong>$1</strong>')
+            .replace(patterns.italic, '<em>$1</em>')
+            .replace(patterns.link, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+            .replace(patterns.image, '<img src="$2" alt="$1" />')
+            .replace(patterns.horizontalRule, '<hr>')
+            .replace(patterns.inlineCode, '<code>$1</code>');
+
+        // Process headings (only outside of code blocks)
+        text = text.replace(patterns.heading, (match, hashes, content) => {
+            if (match.includes('___CODE_BLOCK_')) return match;
             const level = hashes.length;
             return `<h${level}>${content}</h${level}>`;
         });
 
-        // Process bold, italic, and code blocks
-        text = text.replace(boldRegex, '<strong>$1</strong>');
-        text = text.replace(italicRegex, '<em>$1</em>');
-        text = text.replace(codeBlockRegex, (match, code) => {
-            const formattedCode = code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return `<pre><code>${formattedCode}</code></pre>`;
+        // Process lists with proper nesting
+        let currentLevel = 0;
+        let listStack = [];
+
+        text = text.replace(patterns.listItem, (match, indent, marker, content) => {
+            const level = indent.length / 2;
+            const isOrdered = /\d+\./.test(marker);
+            const listType = isOrdered ? 'ol' : 'ul';
+
+            let html = '';
+
+            // Close lists if we're moving back up the nesting
+            while (currentLevel > level) {
+                html += `</${listStack.pop()}>`;
+                currentLevel--;
+            }
+
+            // Open new lists if we're going deeper
+            while (currentLevel < level) {
+                html += `<${listType}>`;
+                listStack.push(listType);
+                currentLevel++;
+            }
+
+            return html + `<li>${content}</li>`;
         });
 
-        // Process unordered lists
-        text = text.replace(listItemRegex, (match, marker, content) => {
-            return `<ul><li>${content}</li></ul>`;
+        // Close any remaining lists
+        while (listStack.length > 0) {
+            text += `</${listStack.pop()}>`;
+        }
+
+        // Restore code blocks with proper formatting
+        text = text.replace(/___CODE_BLOCK_(\d+)___/g, (match, index) => {
+            const block = codeBlocks[parseInt(index)];
+            const language = block.language ? ` class="language-${block.language}"` : '';
+            const escapedCode = block.code
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            return `<pre><code${language}>${escapedCode}</code></pre>`;
         });
 
-        // Process links, images, and horizontal rules
-        text = text.replace(linkRegex, '<a href="$2" target="_blank">$1</a>');
-        text = text.replace(imageRegex, '<img src="$2" alt="$1" />');
-        text = text.replace(horizontalRuleRegex, '<hr>');
-
-        // Add line breaks for new lines that are not part of other HTML elements
-        text = text.replace(/\n(?!<\/?(ul|li|h\d|pre|code|hr|a|img))/g, '<br>');
-
-        // Merge consecutive `<ul></ul>` tags into one list
-        text = text.replace(/<\/ul>\s*<ul>/g, '');
+        // Add line breaks for new lines that aren't part of other HTML elements
+        text = text.replace(/\n(?!<\/?(ul|ol|li|h\d|pre|code|hr|a|img))/g, '<br>');
 
         return text;
     }
@@ -314,9 +364,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         const text = textToSimplify.value.trim();
         if (!text) return;
 
+        //     simplifyResult.innerHTML = `
+        //     <div class="loading-container">
+        //         <div class="typing-indicator">
+        //             <span></span>
+        //             <span></span>
+        //             <span></span>
+        //         </div>
+        //     </div>
+        // `;
         simplifyResult.innerText = 'Simplifying...';
         const level = simplificationLevel.value;
-        const prompt = `${level === 'basic' ? 'Simplify in very basic language ' : 'Explain technically in very technical and professional language'} ,the given text:\n\n${text}`;
+        const prompt = `${level === 'basic' ? 'Simplify in very basic language ' : 'Explain technically in very technical and professional language'} ; Your response must have 3 sections only 1) Inshort 2)BreakDown 3)Think of it like this ,the given text is :\n\n${text}`;
 
         try {
             const stream = await aiSession.promptStreaming(prompt);
