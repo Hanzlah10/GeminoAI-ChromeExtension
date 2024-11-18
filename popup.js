@@ -258,6 +258,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (tabName === 'summarize') {
                 await createSummarizer();
             }
+            if (tabName === 'translate') {
+                populateLanguageDropdowns();
+            }
         });
     });
 
@@ -364,16 +367,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         const text = textToSimplify.value.trim();
         if (!text) return;
 
-        //     simplifyResult.innerHTML = `
-        //     <div class="loading-container">
-        //         <div class="typing-indicator">
-        //             <span></span>
-        //             <span></span>
-        //             <span></span>
-        //         </div>
-        //     </div>
-        // `;
-        simplifyResult.innerText = 'Simplifying...';
+        simplifyResult.innerHTML = `
+            <div class="loading-container">
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        `;
+        // simplifyResult.innerText = 'Simplifying...';
         const level = simplificationLevel.value;
         const prompt = `${level === 'basic' ? 'Simplify in very basic language ' : 'Explain technically in very technical and professional language'} ; Your response must have 3 sections only 1) Inshort 2)BreakDown 3)Think of it like this ,the given text is :\n\n${text}`;
 
@@ -393,33 +396,223 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     // Quiz tab logic
-    const generateQuizBtn = document.getElementById('generateQuizBtn');
-    const quizType = document.getElementById('quizType');
-    const quizArea = document.getElementById('quizArea');
+    // const generateQuizBtn = document.getElementById('generateQuizBtn');
+    // const quizType = document.getElementById('quizType');
+    // const quizArea = document.getElementById('quizArea');
 
-    generateQuizBtn.addEventListener('click', async () => {
-        if (!aiSession && !(await initAI())) return;
-        quizArea.innerText = 'Generating quiz...';
+    // generateQuizBtn.addEventListener('click', async () => {
+    //     if (!aiSession && !(await initAI())) return;
+    //     quizArea.innerText = 'Generating quiz...';
 
-        const quizTypeSelected = quizType.value;
-        const prompt = `Generate a ${quizTypeSelected === 'multiChoice' ? 'multiple-choice' : quizTypeSelected === 'fillBlank' ? 'fill-in-the-blank' : 'true/false'} quiz.`;
+    //     const quizTypeSelected = quizType.value;
+    //     const prompt = `Generate a ${quizTypeSelected === 'multiChoice' ? 'multiple-choice' : quizTypeSelected === 'fillBlank' ? 'fill-in-the-blank' : 'true/false'} quiz.`;
+
+    //     try {
+    //         const stream = await aiSession.promptStreaming(prompt);
+    //         let response = '';
+
+    //         for await (const chunk of stream) {
+    //             response = chunk.trim();
+
+
+    //             const formattedQuizResponse = convertMarkdownToHTML(response);
+    //             quizArea.innerHTML = formattedQuizResponse;
+    //         }
+    //     } catch (error) {
+    //         console.error('Error generating quiz:', error);
+    //         quizArea.innerText = 'Failed to generate quiz.';
+    //     }
+    // });
+
+
+    // Translate Logic
+    // Supported language pairs
+    const supportedLanguages = [
+        { code: 'en', name: 'English' },
+        { code: 'es', name: 'Spanish' },
+        { code: 'ja', name: 'Japanese' },
+        { code: 'ar', name: 'Arabic' },
+        { code: 'bn', name: 'Bengali' },
+        { code: 'de', name: 'German' },
+        { code: 'fr', name: 'French' },
+        { code: 'hi', name: 'Hindi' },
+        { code: 'it', name: 'Italian' },
+        { code: 'ko', name: 'Korean' },
+        { code: 'nl', name: 'Dutch' },
+        { code: 'pl', name: 'Polish' },
+        { code: 'pt', name: 'Portuguese' },
+        { code: 'ru', name: 'Russian' },
+        { code: 'th', name: 'Thai' },
+        { code: 'tr', name: 'Turkish' },
+        { code: 'vi', name: 'Vietnamese' },
+        { code: 'zh', name: 'Chinese (Simplified)' },
+        { code: 'zh-Hant', name: 'Chinese (Traditional)' },
+    ];
+
+    // Initialize elements
+    const elements = {
+        sourceText: document.getElementById('userInputText'),
+        sourceLanguage: document.getElementById('sourceLanguageDropdown'),
+        targetLanguage: document.getElementById('targetLanguageDropdown'),
+        translationResult: document.getElementById('translationResult'),
+        translateBtn: document.getElementById('translateBtn'),
+        swapBtn: document.getElementById('swapLanguages'),
+        copyBtn: document.getElementById('copyTranslation'),
+        speakSourceBtn: document.getElementById('speakSource'),
+        speakTargetBtn: document.getElementById('speakTarget'),
+        errorAlert: document.getElementById('errorAlert'),
+        charCounter: document.getElementById('charCount')
+    };
+
+    elements.translateBtn.addEventListener('click', translateText);
+    elements.swapBtn.addEventListener('click', swapLanguages);
+    elements.copyBtn.addEventListener('click', copyTranslation);
+    elements.speakSourceBtn.addEventListener('click', () => speakText('source'));
+    elements.speakTargetBtn.addEventListener('click', () => speakText('target'));
+    elements.sourceText.addEventListener('input', updateCharacterCount);
+
+    // Show error message
+    function showError(message, duration = 5000) {
+        const errorAlert = elements.errorAlert;
+        errorAlert.querySelector('.error-message').textContent = message;
+        errorAlert.style.display = 'flex';
+        setTimeout(() => {
+            errorAlert.style.display = 'none';
+        }, duration);
+    }
+
+    // Update character count
+    function updateCharacterCount() {
+        const count = elements.sourceText.value.length;
+        elements.charCounter.textContent = count;
+        if (count >= 4900) {
+            elements.charCounter.classList.add('near-limit');
+        } else {
+            elements.charCounter.classList.remove('near-limit');
+        }
+    }
+
+    // Populate language dropdowns
+    function populateLanguageDropdowns() {
+        const populateDropdown = (dropdown, defaultLang) => {
+            dropdown.innerHTML = '';
+            supportedLanguages.forEach(lang => {
+                const option = document.createElement('option');
+                option.value = lang.code;
+                option.textContent = lang.name;
+                if (lang.code === defaultLang) option.selected = true;
+                dropdown.appendChild(option);
+            });
+        };
+
+        populateDropdown(elements.sourceLanguage, 'en');
+        populateDropdown(elements.targetLanguage, 'es');
+    }
+
+    // Translate text
+    async function translateText() {
+        const text = elements.sourceText.value.trim();
+        if (!text) {
+            showError('Please enter text to translate.');
+            return;
+        }
+
+        if (!self.translation) {
+            showError('Translation API not available. Please enable it in chrome://flags.');
+            return;
+        }
 
         try {
-            const stream = await aiSession.promptStreaming(prompt);
-            let response = '';
+            elements.translateBtn.disabled = true;
+            elements.translationResult.classList.add('loading');
 
-            for await (const chunk of stream) {
-                response = chunk.trim();
+            const languagePair = {
+                sourceLanguage: elements.sourceLanguage.value,
+                targetLanguage: elements.targetLanguage.value
+            };
 
+            const canTranslate = await translation.canTranslate(languagePair);
 
-                const formattedQuizResponse = convertMarkdownToHTML(response);
-                quizArea.innerHTML = formattedQuizResponse;
+            if (canTranslate === 'readily') {
+                const translator = await translation.createTranslator(languagePair);
+                const translatedText = await translator.translate(text);
+                elements.translationResult.textContent = translatedText;
+                elements.translationResult.classList.remove('placeholder');
+            } else {
+                showError('Translation is not available for the selected languages.');
             }
         } catch (error) {
-            console.error('Error generating quiz:', error);
-            quizArea.innerText = 'Failed to generate quiz.';
+            showError(`Translation error: ${error.message}`);
+        } finally {
+            elements.translateBtn.disabled = false;
+            elements.translationResult.classList.remove('loading');
         }
-    });
+    }
+
+    // Swap languages
+    function swapLanguages() {
+        const sourceVal = elements.sourceLanguage.value;
+        const targetVal = elements.targetLanguage.value;
+        const sourceText = elements.sourceText.value;
+        const targetText = elements.translationResult.textContent;
+
+        elements.sourceLanguage.value = targetVal;
+        elements.targetLanguage.value = sourceVal;
+        elements.sourceText.value = targetText;
+        elements.translationResult.textContent = sourceText;
+        updateCharacterCount();
+    }
+
+    // Copy translation
+    async function copyTranslation() {
+        const text = elements.translationResult.textContent;
+        if (text && !text.includes('Translation will appear here')) {
+            try {
+                await navigator.clipboard.writeText(text);
+                elements.copyBtn.classList.add('copied');
+                setTimeout(() => elements.copyBtn.classList.remove('copied'), 2000);
+            } catch (error) {
+                showError('Failed to copy text to clipboard');
+            }
+        }
+    }
+
+    // Text-to-speech function
+    function speakText(type) {
+        const text = type === 'source' ? elements.sourceText.value : elements.translationResult.textContent;
+        const lang = type === 'source' ? elements.sourceLanguage.value : elements.targetLanguage.value;
+
+        if (text && !text.includes('Translation will appear here')) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            speechSynthesis.speak(utterance);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //Chat Functionality
     const chatMessages = document.getElementById('chatMessages');

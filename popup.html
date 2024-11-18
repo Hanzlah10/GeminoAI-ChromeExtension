@@ -70,6 +70,15 @@
                     </svg>
                     Summarize
                 </button>
+                <button class="tab-btn" data-tab="translate">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    Translate
+                </button>
                 <button class="tab-btn" data-tab="simplify">
                     <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -78,15 +87,7 @@
                     </svg>
                     Simplify
                 </button>
-                <button class="tab-btn" data-tab="quiz">
-                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                    Quiz
-                </button>
+
             </nav>
 
             <main class="content">
@@ -147,7 +148,7 @@
                     <div id="simplifyResult" class="result-area"></div>
                 </section>
 
-                <section id="quiz" class="tab-content">
+                <!-- <section id="quiz" class="tab-content">
                     <div class="action-panel">
                         <div class="button-row">
                             <select id="quizType" class="select-input">
@@ -171,7 +172,66 @@
                     <div id="quizArea" class="result-area">
                         <div class="placeholder">Select quiz type and click generate</div>
                     </div>
+                </section> -->
+
+                <section id="translate" class="tab-content">
+                    <!-- Error Alert Container -->
+                    <div id="errorAlert" class="error-alert" style="display: none;">
+                        <div class="error-content">
+                            <span class="error-icon">⚠️</span>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="translate-container">
+                        <!-- Source Text Container -->
+                        <div class="text-container source-container">
+                            <div class="language-bar">
+                                <select id="sourceLanguageDropdown" class="language-select"></select>
+                                <button id="speakSource" class="icon-button" title="Listen">
+                                    <i class="volume-icon">🔊</i>
+                                </button>
+                            </div>
+                            <textarea id="userInputText" class="translation-textarea"
+                                placeholder="Enter text to translate..." maxlength="5000"></textarea>
+                            <div class="character-counter">
+                                <span id="charCount">0</span>/5000
+                            </div>
+                        </div>
+
+                        <!-- Language Swap Button -->
+                        <button id="swapLanguages" class="swap-button" title="Swap languages">
+                            <span class="swap-icon">⇄</span>
+                        </button>
+
+                        <!-- Target Text Container -->
+                        <div class="text-container target-container">
+                            <div class="language-bar">
+                                <select id="targetLanguageDropdown" class="language-select"></select>
+                                <div class="target-controls">
+                                    <button id="speakTarget" class="icon-button" title="Listen">
+                                        <i class="volume-icon">🔊</i>
+                                    </button>
+                                    <button id="copyTranslation" class="icon-button" title="Copy translation">
+                                        <i class="copy-icon">📋</i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="translationResult" class="translation-result">
+                                <div class="placeholder">Translation will appear here</div>
+                            </div>
+                        </div>
+
+                        <!-- Translation Button -->
+                        <button id="translateBtn" class="primary-btn translate-button">
+                            <span class="translate-icon">🌐</span>
+                            Translate
+                        </button>
+                    </div>
                 </section>
+
+
+
             </main>
         </div>
     </div>
