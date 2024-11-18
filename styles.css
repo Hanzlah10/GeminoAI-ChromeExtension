@@ -1,43 +1,42 @@
 :root {
-    /* Light theme */
-    --primary-color: #3b82f6;
-    --primary-hover: #2563eb;
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --bg-tertiary: #f1f5f9;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    --user-message-bg: #3b85e5;
-    --bot-message-bg: #8699ac;
-    --accent-color: #60a5fa;
-    --error-color: #ef4444;
-    --success-color: #22c55e;
+    /* Light theme - Clean, bright, with vibrant accents */
+    --primary-color: #6366f1;      /* Modern indigo */
+    --primary-hover: #4f46e5;      /* Deeper indigo on hover */
+    --bg-primary: #ffffff;         /* Pure white background */
+    --bg-secondary: #f8faff;       /* Slight blue tint */
+    --bg-tertiary: #eef2ff;       /* Light indigo background */
+    --text-primary: #0f172a;      /* Deep slate for contrast */
+    --text-secondary: #4b5563;    /* Modern gray */
+    --border-color: #e0e7ff;      /* Subtle indigo border */
+    --shadow-sm: 0 2px 4px 0 rgba(99, 102, 241, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(99, 102, 241, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(99, 102, 241, 0.1);
+    --user-message-bg: #818cf8;    /* Lighter indigo */
+    --bot-message-bg: #f1f5f9;     /* Light slate */
+    --accent-color: #06b6d4;       /* Cyan for highlights */
+    --error-color: #dc2626;        /* Vivid red */
+    --success-color: #10b981;      /* Modern green */
 }
 
 [data-theme="dark"] {
-    --primary-color: #3b82f6;
-    --primary-hover: #60a5fa;
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --border-color: #334155;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
-    --user-message-bg: #1e40af;
-    --bot-message-bg: #1e293b;
-    --accent-color: #60a5fa;
-    --error-color: #f87171;
-    --success-color: #4ade80;
+    /* Dark theme - Deep, rich colors with glowing accents */
+    --primary-color: #818cf8;      /* Bright indigo */
+    --primary-hover: #a5b4fc;      /* Lighter on hover for dark theme */
+    --bg-primary: #030712;         /* Deep dark background */
+    --bg-secondary: #201d4b;       /* Rich navy */
+    --bg-tertiary: #1e293b;        /* Lighter navy */
+    --text-primary: #f8fafc;       /* Bright white text */
+    --text-secondary: #94a3b8;     /* Soft blue-gray */
+    --border-color: #323674;       /* Subtle borders */
+    --shadow-sm: 0 2px 4px 0 rgba(99, 102, 241, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+    --user-message-bg: #4f46e5;    /* Deep indigo messages */
+    --bot-message-bg: #1e293b;     /* Navy messages */
+    --accent-color: #22d3ee;       /* Glowing cyan */
+    --error-color: #ef4444;        /* Bright error red */
+    --success-color: #34d399;      /* Bright success green */
 }
-
-
 
 * {
     margin: 0;
