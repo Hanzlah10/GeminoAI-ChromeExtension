@@ -71,11 +71,13 @@
                     Summarize
                 </button>
                 <button class="tab-btn" data-tab="translate">
-                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
+                    <svg class="tab-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M2 12h20" />
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                     </svg>
                     Translate
                 </button>
@@ -148,37 +150,20 @@
                     <div id="simplifyResult" class="result-area"></div>
                 </section>
 
-                <!-- <section id="quiz" class="tab-content">
-                    <div class="action-panel">
-                        <div class="button-row">
-                            <select id="quizType" class="select-input">
-                                <option value="multiChoice">Multiple Choice</option>
-                                <option value="fillBlank">Fill in the Blank</option>
-                                <option value="truefalse">True/False</option>
-                            </select>
-                            <button id="generateQuizBtn" class="primary-btn">
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                Generate Quiz
-                            </button>
-                        </div>
-                    </div>
-                    <div id="quizArea" class="result-area">
-                        <div class="placeholder">Select quiz type and click generate</div>
-                    </div>
-                </section> -->
-
                 <section id="translate" class="tab-content">
                     <!-- Error Alert Container -->
                     <div id="errorAlert" class="error-alert" style="display: none;">
                         <div class="error-content">
-                            <span class="error-icon">⚠️</span>
+                            <span class="error-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                            </span>
                             <span class="error-message"></span>
                         </div>
                     </div>
@@ -189,7 +174,12 @@
                             <div class="language-bar">
                                 <select id="sourceLanguageDropdown" class="language-select"></select>
                                 <button id="speakSource" class="icon-button" title="Listen">
-                                    <i class="volume-icon">🔊</i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                    </svg>
                                 </button>
                             </div>
                             <textarea id="userInputText" class="translation-textarea"
@@ -210,10 +200,21 @@
                                 <select id="targetLanguageDropdown" class="language-select"></select>
                                 <div class="target-controls">
                                     <button id="speakTarget" class="icon-button" title="Listen">
-                                        <i class="volume-icon">🔊</i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                        </svg>
                                     </button>
-                                    <button id="copyTranslation" class="icon-button" title="Copy translation">
-                                        <i class="copy-icon">📋</i>
+                                    <button id="copyTranslation" class="icon-button" style="display: none;"
+                                        title="Copy translation">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
@@ -224,7 +225,14 @@
 
                         <!-- Translation Button -->
                         <button id="translateBtn" class="primary-btn translate-button">
-                            <span class="translate-icon">🌐</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M2 12h20" />
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                            </svg>
                             Translate
                         </button>
                     </div>

@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         speakSourceBtn: document.getElementById('speakSource'),
         speakTargetBtn: document.getElementById('speakTarget'),
         errorAlert: document.getElementById('errorAlert'),
-        charCounter: document.getElementById('charCount')
+        charCounter: document.getElementById('charCount'),
     };
 
     elements.translateBtn.addEventListener('click', translateText);
@@ -538,6 +538,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const translatedText = await translator.translate(text);
                 elements.translationResult.textContent = translatedText;
                 elements.translationResult.classList.remove('placeholder');
+                elements.copyBtn.style.display = 'inline-block';
             } else {
                 showError('Translation is not available for the selected languages.');
             }

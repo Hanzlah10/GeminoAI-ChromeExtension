@@ -669,7 +669,7 @@ textarea {
 
 .translation-textarea {
     width: 100%;
-    min-height: 120px;
+    min-height: 70px;
     padding: 12px;
     border: none;
     background-color: transparent;
@@ -694,7 +694,7 @@ textarea {
 }
 
 .translation-result {
-    min-height: 120px;
+    min-height: 70px;
     padding: 12px;
     color: var(--text-primary);
 }
