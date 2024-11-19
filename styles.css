@@ -536,7 +536,6 @@ textarea {
     position: relative;
     height: 100px;
     width: 100%;
-    /* background-color: rgba(223, 79, 79, 0.8); */
     z-index: 100;
 }
 
@@ -639,19 +638,6 @@ textarea {
 .character-counter.near-limit {
     color: var(--error-color);
 }
-
-/* .translation-result {
-    min-height: 70px;
-    padding: 12px;
-    color: var(--text-primary);
-}
-
-.translation-result.placeholder {
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-} */
 
 .swap-button {
     align-self: center;
