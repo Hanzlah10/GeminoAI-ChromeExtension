@@ -105,8 +105,8 @@
                         </div>
                         <div class="chat-input-container">
                             <div class="chat-input-wrapper">
-                                <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off"
-                                    aria-label="Chat input" />
+                                <input type="text" id="chatInput" class="placeholder" placeholder="Type a message..."
+                                    autocomplete="off" aria-label="Chat input" />
                                 <button id="sendChatBtn" class="send-button" aria-label="Send message">
                                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="currentColor"
@@ -139,7 +139,8 @@
 
                 <section id="simplify" class="tab-content">
                     <div class="action-panel">
-                        <textarea id="textToSimplify" placeholder="Paste text to simplify..."></textarea>
+                        <textarea id="textToSimplify" class="placeholder"
+                            placeholder="Paste text to simplify..."></textarea>
                         <div class="button-row">
                             <select id="simplificationLevel" class="select-input">
                                 <option value="basic">Basic Simplification</option>
@@ -226,7 +227,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div id="translationResult" class="translation-result">
+                            <div id="translationResult" class="translation-textarea">
                                 <div class="placeholder">Translation will appear here</div>
                             </div>
                         </div>

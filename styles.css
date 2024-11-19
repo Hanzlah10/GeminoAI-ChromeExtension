@@ -24,7 +24,7 @@
     --primary-hover: #a5b4fc;      /* Lighter on hover for dark theme */
     --bg-primary: #030712;         /* Deep dark background */
     --bg-secondary: #201d4b;       /* Rich navy */
-    --bg-tertiary: #1e293b;        /* Lighter navy */
+    --bg-tertiary: #38377b81;        /* Lighter navy */
     --text-primary: #f8fafc;       /* Bright white text */
     --text-secondary: #94a3b8;     /* Soft blue-gray */
     --border-color: #323674;       /* Subtle borders */
@@ -512,8 +512,7 @@ textarea {
 
 .placeholder {
     color: var(--text-secondary);
-    text-align: center;
-    padding: 32px 16px;
+    padding: 10px 10px
 }
 
 
@@ -703,7 +702,7 @@ textarea {
     color: var(--error-color);
 }
 
-.translation-result {
+/* .translation-result {
     min-height: 70px;
     padding: 12px;
     color: var(--text-primary);
@@ -714,7 +713,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-}
+} */
 
 .swap-button {
     align-self: center;
