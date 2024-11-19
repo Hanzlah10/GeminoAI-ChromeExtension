@@ -9,10 +9,10 @@
         "scripting"
     ],
     "icons": {
-        "16": "joke.png",
-        "32": "joke.png",
-        "48": "joke.png",
-        "128": "joke.png"
+        "16": "RobotLogo.png",
+        "32": "RobotLogo.png",
+        "48": "RobotLogo.png",
+        "128": "RobotLogo.png"
     },
     "optional_permissions": [],
     "action": {

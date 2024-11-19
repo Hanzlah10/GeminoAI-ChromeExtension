@@ -132,18 +132,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Try to initialize summarizer, but don't block other features if it fails
-    // await createSummarizer();
+
 
     // Function to convert markup to plain text
     function convertMarkdownToHTML(text) {
         if (!text) return "";
 
-        // First, we'll preserve code blocks by temporarily replacing them
         const codeBlocks = [];
         let codeBlockCounter = 0;
 
-        // Handle both fenced code blocks with language specification and without
         text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language, code) => {
             const placeholder = `___CODE_BLOCK_${codeBlockCounter}___`;
             codeBlocks.push({
@@ -154,7 +151,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             return placeholder;
         });
 
-        // Regular expression patterns
         const patterns = {
             heading: /^(#{1,6})\s+(.*)$/gm,
             bold: /\*\*(.*?)\*\*/g,
@@ -166,7 +162,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             inlineCode: /`([^`]+)`/g
         };
 
-        // Process basic markdown elements
         text = text
             .replace(patterns.bold, '<strong>$1</strong>')
             .replace(patterns.italic, '<em>$1</em>')
@@ -175,14 +170,12 @@ document.addEventListener('DOMContentLoaded', async function () {
             .replace(patterns.horizontalRule, '<hr>')
             .replace(patterns.inlineCode, '<code>$1</code>');
 
-        // Process headings (only outside of code blocks)
         text = text.replace(patterns.heading, (match, hashes, content) => {
             if (match.includes('___CODE_BLOCK_')) return match;
             const level = hashes.length;
             return `<h${level}>${content}</h${level}>`;
         });
 
-        // Process lists with proper nesting
         let currentLevel = 0;
         let listStack = [];
 
@@ -193,7 +186,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             let html = '';
 
-            // Close lists if we're moving back up the nesting
             while (currentLevel > level) {
                 html += `</${listStack.pop()}>`;
                 currentLevel--;
@@ -209,12 +201,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             return html + `<li>${content}</li>`;
         });
 
-        // Close any remaining lists
         while (listStack.length > 0) {
             text += `</${listStack.pop()}>`;
         }
 
-        // Restore code blocks with proper formatting
         text = text.replace(/___CODE_BLOCK_(\d+)___/g, (match, index) => {
             const block = codeBlocks[parseInt(index)];
             const language = block.language ? ` class="language-${block.language}"` : '';
@@ -225,7 +215,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             return `<pre><code${language}>${escapedCode}</code></pre>`;
         });
 
-        // Add line breaks for new lines that aren't part of other HTML elements
         text = text.replace(/\n(?!<\/?(ul|ol|li|h\d|pre|code|hr|a|img))/g, '<br>');
 
         return text;
@@ -241,20 +230,17 @@ document.addEventListener('DOMContentLoaded', async function () {
             e.preventDefault();
             const tabName = btn.dataset.tab;
 
-            // Remove active class from all buttons and contents
             tabBtns.forEach(b => b.classList.remove('active'));
             tabContents.forEach(c => {
                 c.classList.remove('active');
                 c.style.display = 'none';
             });
 
-            // Add active class to clicked button and corresponding content
             btn.classList.add('active');
             const activeContent = document.getElementById(tabName);
             activeContent.classList.add('active');
             activeContent.style.display = 'block';
 
-            // Handle summarizer initialization if needed
             if (tabName === 'summarize') {
                 await createSummarizer();
             }
@@ -264,7 +250,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     });
 
-    // Additional styles for tab content visibility
     document.querySelectorAll('.tab-content').forEach(content => {
         if (!content.classList.contains('active')) {
             content.style.display = 'none';
@@ -309,12 +294,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-            // Execute script to retrieve the page content
             chrome.scripting.executeScript(
                 {
                     target: { tabId: tab.id },
                     function: () => {
-                        // Attempt to fetch the text content from the root element to capture more text
                         return document.documentElement.innerText || document.documentElement.outerText || document.body.textContent;
                     }
                 },
@@ -331,17 +314,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                         return;
                     }
 
-                    // Summarize the page text
                     const summary = await summarizeText(pageText);
                     if (summary) {
-                        // Display the summary
                         summaryResult.innerHTML = `
                             <div class="summary-content">
                                 <div class="message-content">${convertMarkdownToHTML(summary)}</div>
                             </div>
                         `;
 
-                        // Add the copy button
                         const summaryContentEl = summaryResult.querySelector('.summary-content');
                         addCopyButton(summaryContentEl);
                     } else {
@@ -376,13 +356,12 @@ document.addEventListener('DOMContentLoaded', async function () {
                 </div>
             </div>
         `;
-        // simplifyResult.innerText = 'Simplifying...';
         const level = simplificationLevel.value;
         const prompt = `${level === 'basic' ? 'Simplify in very basic language ' : 'Explain technically in very technical and professional language'} ; Your response must have 3 sections only 1) Inshort 2)BreakDown 3)Think of it like this ,the given text is :\n\n${text}`;
 
         try {
             const stream = await aiSession.promptStreaming(prompt);
-            let response = ''; // Initialize response variable
+            let response = '';
 
             for await (const chunk of stream) {
                 response = chunk.trim();
@@ -395,38 +374,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
 
-    // Quiz tab logic
-    // const generateQuizBtn = document.getElementById('generateQuizBtn');
-    // const quizType = document.getElementById('quizType');
-    // const quizArea = document.getElementById('quizArea');
-
-    // generateQuizBtn.addEventListener('click', async () => {
-    //     if (!aiSession && !(await initAI())) return;
-    //     quizArea.innerText = 'Generating quiz...';
-
-    //     const quizTypeSelected = quizType.value;
-    //     const prompt = `Generate a ${quizTypeSelected === 'multiChoice' ? 'multiple-choice' : quizTypeSelected === 'fillBlank' ? 'fill-in-the-blank' : 'true/false'} quiz.`;
-
-    //     try {
-    //         const stream = await aiSession.promptStreaming(prompt);
-    //         let response = '';
-
-    //         for await (const chunk of stream) {
-    //             response = chunk.trim();
-
-
-    //             const formattedQuizResponse = convertMarkdownToHTML(response);
-    //             quizArea.innerHTML = formattedQuizResponse;
-    //         }
-    //     } catch (error) {
-    //         console.error('Error generating quiz:', error);
-    //         quizArea.innerText = 'Failed to generate quiz.';
-    //     }
-    // });
-
 
     // Translate Logic
-    // Supported language pairs
     const supportedLanguages = [
         { code: 'en', name: 'English' },
         { code: 'es', name: 'Spanish' },
@@ -449,7 +398,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         { code: 'zh-Hant', name: 'Chinese (Traditional)' },
     ];
 
-    // Initialize elements
     const elements = {
         sourceText: document.getElementById('userInputText'),
         sourceLanguage: document.getElementById('sourceLanguageDropdown'),
@@ -471,7 +419,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     elements.speakTargetBtn.addEventListener('click', () => speakText('target'));
     elements.sourceText.addEventListener('input', updateCharacterCount);
 
-    // Show error message
     function showError(message, duration = 5000) {
         const errorAlert = elements.errorAlert;
         errorAlert.querySelector('.error-message').textContent = message;
@@ -481,7 +428,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }, duration);
     }
 
-    // Update character count
     function updateCharacterCount() {
         const count = elements.sourceText.value.length;
         elements.charCounter.textContent = count;
@@ -492,7 +438,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Populate language dropdowns
     function populateLanguageDropdowns() {
         const populateDropdown = (dropdown, defaultLang) => {
             dropdown.innerHTML = '';
@@ -509,7 +454,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         populateDropdown(elements.targetLanguage, 'es');
     }
 
-    // Translate text
     async function translateText() {
         const text = elements.sourceText.value.trim();
         if (!text) {
@@ -550,7 +494,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Swap languages
     function swapLanguages() {
         const sourceVal = elements.sourceLanguage.value;
         const targetVal = elements.targetLanguage.value;
@@ -564,7 +507,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         updateCharacterCount();
     }
 
-    // Copy translation
     async function copyTranslation() {
         const text = elements.translationResult.textContent;
         if (text && !text.includes('Translation will appear here')) {
@@ -578,7 +520,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Text-to-speech function
     function speakText(type) {
         const text = type === 'source' ? elements.sourceText.value : elements.translationResult.textContent;
         const lang = type === 'source' ? elements.sourceLanguage.value : elements.targetLanguage.value;
@@ -590,39 +531,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     //Chat Functionality
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const sendChatBtn = document.getElementById('sendChatBtn');
 
-    let abortController = null; // To manage aborting the API request
+    let abortController = null;
 
-    // Utility function for copy icon SVG
     function createCopyButton() {
         const copyButton = document.createElement('button');
         copyButton.className = 'copy-button';
@@ -641,7 +556,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         const question = chatInput.value.trim();
         if (!question) return;
 
-        // Clear the input
         chatInput.value = '';
         appendMessage('user', question);
 
@@ -650,7 +564,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        // Set the button to "Stop" while processing
         sendChatBtn.textContent = 'Stop';
         sendChatBtn.onclick = stopResponse;
 
@@ -700,7 +613,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 response = chunk;
                 updateMessageContent(messageEl, convertMarkdownToHTML(response));
             }
-            // Add copy button after response is complete
             addCopyButton(messageEl);
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -723,7 +635,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const textToCopy = messageEl.querySelector('.message-content').textContent;
                 await navigator.clipboard.writeText(textToCopy);
 
-                // Show success state
                 copyButton.classList.add('copied');
                 copyButton.innerHTML = `
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -731,7 +642,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                     </svg>
                 `;
 
-                // Reset after 2 seconds
                 setTimeout(() => {
                     copyButton.classList.remove('copied');
                     copyButton.innerHTML = `
@@ -750,7 +660,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
 
-    // Updated appendMessage function
     function appendMessage(role, msg) {
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${role}`;
@@ -789,7 +698,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         messageContent.innerHTML = msg;
     }
 
-    // Event Listeners
     sendChatBtn.addEventListener('click', handleChatInput);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleChatInput();

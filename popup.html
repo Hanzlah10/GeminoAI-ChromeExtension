@@ -11,19 +11,10 @@
 <body>
     <div class="container">
         <div id="error-message" class="error-alert" style="display: none;"></div>
-
         <header class="app-header">
-
             <div class="logo-section">
-                <div class="logo-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
+                <div>
+                    <img src="RobotLogo.png" class="logo-icon" alt="logo">
                 </div>
                 <h1>Built-in AI</h1>
             </div>
@@ -52,7 +43,6 @@
         </div>
 
         <div id="extensionContent" style="display: none;">
-
             <nav class="feature-tabs">
                 <button class="tab-btn active" data-tab="chat">
                     <svg class="tab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -96,7 +86,6 @@
                 <section id="chat" class="tab-content active">
                     <div class="chat-container">
                         <div id="chatMessages" class="chat-messages">
-                            <!-- Placeholder message example -->
                             <div class="chat-message robot">
                                 <div class="message-content">
                                     👋 Hi! How can I help you today?
@@ -160,7 +149,6 @@
                 </section>
 
                 <section id="translate" class="tab-content">
-                    <!-- Error Alert Container -->
                     <div id="errorAlert" class="error-alert" style="display: none;">
                         <div class="error-content">
                             <span class="error-icon">
@@ -178,7 +166,6 @@
                     </div>
 
                     <div class="translate-container">
-                        <!-- Source Text Container -->
                         <div class="text-container source-container">
                             <div class="language-bar">
                                 <select id="sourceLanguageDropdown" class="language-select"></select>
@@ -198,12 +185,10 @@
                             </div>
                         </div>
 
-                        <!-- Language Swap Button -->
                         <button id="swapLanguages" class="swap-button" title="Swap languages">
                             <span class="swap-icon">⇄</span>
                         </button>
 
-                        <!-- Target Text Container -->
                         <div class="text-container target-container">
                             <div class="language-bar">
                                 <select id="targetLanguageDropdown" class="language-select"></select>
@@ -232,7 +217,6 @@
                             </div>
                         </div>
 
-                        <!-- Translation Button -->
                         <button id="translateBtn" class="primary-btn translate-button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -246,9 +230,6 @@
                         </button>
                     </div>
                 </section>
-
-
-
             </main>
         </div>
     </div>

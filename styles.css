@@ -1,41 +1,39 @@
 :root {
-    /* Light theme - Clean, bright, with vibrant accents */
-    --primary-color: #6366f1;      /* Modern indigo */
-    --primary-hover: #4f46e5;      /* Deeper indigo on hover */
-    --bg-primary: #ffffff;         /* Pure white background */
-    --bg-secondary: #f8faff;       /* Slight blue tint */
-    --bg-tertiary: #eef2ff;       /* Light indigo background */
-    --text-primary: #0f172a;      /* Deep slate for contrast */
-    --text-secondary: #4b5563;    /* Modern gray */
-    --border-color: #e0e7ff;      /* Subtle indigo border */
+    --primary-color: #6366f1;      
+    --primary-hover: #4f46e5;      
+    --bg-primary: #ffffff;         
+    --bg-secondary: #f8faff;       
+    --bg-tertiary: #eef2ff;       
+    --text-primary: #0f172a;      
+    --text-secondary: #4b5563;    
+    --border-color: #e0e7ff;      
     --shadow-sm: 0 2px 4px 0 rgba(99, 102, 241, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(99, 102, 241, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(99, 102, 241, 0.1);
-    --user-message-bg: #818cf8;    /* Lighter indigo */
-    --bot-message-bg: #f1f5f9;     /* Light slate */
-    --accent-color: #06b6d4;       /* Cyan for highlights */
-    --error-color: #dc2626;        /* Vivid red */
-    --success-color: #10b981;      /* Modern green */
+    --user-message-bg: #818cf8;    
+    --bot-message-bg: #f1f5f9;     
+    --accent-color: #06b6d4;       
+    --error-color: #dc2626;       
+    --success-color: #10b981;     
 }
 
 [data-theme="dark"] {
-    /* Dark theme - Deep, rich colors with glowing accents */
-    --primary-color: #818cf8;      /* Bright indigo */
-    --primary-hover: #a5b4fc;      /* Lighter on hover for dark theme */
-    --bg-primary: #030712;         /* Deep dark background */
-    --bg-secondary: #201d4b;       /* Rich navy */
-    --bg-tertiary: #38377b81;        /* Lighter navy */
-    --text-primary: #f8fafc;       /* Bright white text */
-    --text-secondary: #94a3b8;     /* Soft blue-gray */
-    --border-color: #323674;       /* Subtle borders */
+    --primary-color: #818cf8;      
+    --primary-hover: #a5b4fc;      
+    --bg-primary: #030712;         
+    --bg-secondary: #201d4b;       
+    --bg-tertiary: #38377b81;      
+    --text-primary: #f8fafc;       
+    --text-secondary: #94a3b8;     
+    --border-color: #323674;       
     --shadow-sm: 0 2px 4px 0 rgba(99, 102, 241, 0.2);
     --shadow-md: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
     --shadow-lg: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
-    --user-message-bg: #4f46e5;    /* Deep indigo messages */
-    --bot-message-bg: #1e293b;     /* Navy messages */
-    --accent-color: #22d3ee;       /* Glowing cyan */
-    --error-color: #ef4444;        /* Bright error red */
-    --success-color: #34d399;      /* Bright success green */
+    --user-message-bg: #4f46e5;    
+    --bot-message-bg: #1e293b;     
+    --accent-color: #22d3ee;       
+    --error-color: #ef4444;        
+    --success-color: #34d399;      
 }
 
 * {
@@ -83,9 +81,7 @@ body {
     justify-content: center;
     width: 40px;
     height: 40px;
-    background-color: var(--primary-color);
     border-radius: 12px;
-    color: white;
 }
 
 .app-header h1 {
@@ -557,65 +553,7 @@ textarea {
     transition: opacity 0.3s;
 }
 
-@keyframes spin {
-    0% {
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-    100% {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes messageSlide {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 8px;
-}
-::-webkit-scrollbar:horizontal {
-    height: 8px; 
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-tertiary);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
-}
 
 /* Translation specific styles */
 .translate-container {
@@ -774,7 +712,64 @@ textarea {
     color: var(--success-color) !important;
 }
 
+/* Animations */
+
+@keyframes spin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar:horizontal {
+    height: 8px; 
+}
 
+::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
 
