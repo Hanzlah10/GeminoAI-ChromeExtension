@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const loadingSpinner = document.getElementById('loading-spinner-wrap');
     let aiSession = null;
     let summarizer = null;
-    let extensionActive = false;
 
     const themeToggle = document.getElementById('themeToggle');
     const html = document.documentElement;
@@ -15,86 +14,72 @@ document.addEventListener('DOMContentLoaded', async function () {
     html.setAttribute('data-theme', savedTheme);
     updateThemeToggleIcon(savedTheme);
 
-    // Function to update the theme toggle icon
     function updateThemeToggleIcon(theme) {
         themeToggle.innerHTML = theme === 'light'
             ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>'
             : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>';
     }
 
-    // Event listener to toggle the theme
     themeToggle.addEventListener('click', () => {
         const currentTheme = html.getAttribute('data-theme');
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         html.setAttribute('data-theme', newTheme);
-
-        // Save the new theme in localStorage
         localStorage.setItem('theme', newTheme);
-
-        // Update theme toggle icon
         updateThemeToggleIcon(newTheme);
     });
 
-
-    // Start the Extension
     async function startExtension() {
         if (!self.ai?.languageModel) {
             errorMessage.textContent = "This extension requires Chrome's AI features. Please enable them in chrome://flags/#enable-web-ai";
             errorMessage.style.display = 'block';
             return;
         }
-        // Show the loading spinner
         loadingSpinner.style.display = 'flex';
         errorMessage.style.display = 'none';
-        // Initialize AI session
+
         const sessionInitialized = await initAI();
-        // Hide the loading spinner
         loadingSpinner.style.display = 'none';
         if (sessionInitialized) {
             extensionContent.style.display = 'block';
-            toggleExtensionBtn.querySelector('.toggle-text').textContent = 'ON';  // Update just the text span
+            toggleExtensionBtn.querySelector('.toggle-text').textContent = 'ON';
             toggleExtensionBtn.classList.add('active');
-            extensionActive = true;
+            updateExtensionState(true);
         } else {
             errorMessage.textContent = 'Failed to initialize AI session. Please try again.';
             errorMessage.style.display = 'block';
         }
     }
 
-    // Stop the extension
     async function stopExtension() {
         if (aiSession) {
-            aiSession.destroy(); // Destroy AI session
+            aiSession.destroy();
             aiSession = null;
         }
         if (summarizer) {
-            summarizer.destroy(); // Destroy summarizer if active
+            summarizer.destroy();
             summarizer = null;
         }
         extensionContent.style.display = 'none';
-        toggleExtensionBtn.querySelector('.toggle-text').textContent = 'OFF';  // Update just the text span
+        toggleExtensionBtn.querySelector('.toggle-text').textContent = 'OFF';
         toggleExtensionBtn.classList.remove('active');
-        extensionActive = false;
+        updateExtensionState(false);
     }
 
-    // Toggle button event listener
     toggleExtensionBtn.addEventListener('click', async () => {
-        if (extensionActive) {
+        const isActive = await getExtensionState();
+        if (isActive) {
             await stopExtension();
         } else {
             await startExtension();
         }
     });
 
-
-
-    // Initialize AI session function
     async function initAI() {
         try {
             aiSession = await self.ai.languageModel.create({
                 temperature: 0.7,
                 topK: 3,
-                systemPrompt: "You are my personal assistant, and your role is to help me stay organized, productive, and informed by giving me short and concise answers. I may ask you for help with tasks such as scheduling, reminders, planning, research, or learning new things. When I ask questions, please respond with clear, concise and short answers. If I need guidance on a topic, break it down into actionable steps. Keep a polite and professional tone but add a friendly, supportive touch. If I forget something I’ve previously mentioned, remind me of any relevant information to make things easier. Your goal is to help me achieve my personal and professional goals efficiently."
+                systemPrompt: "You are my personal assistant. Help me stay organized, productive, and informed by providing concise, actionable insights."
             });
             return true;
         } catch (error) {
@@ -102,6 +87,62 @@ document.addEventListener('DOMContentLoaded', async function () {
             return false;
         }
     }
+
+    async function updateExtensionState(state) {
+        chrome.runtime.sendMessage({ type: 'UPDATE_STATE', payload: state });
+    }
+
+    async function getExtensionState() {
+        return new Promise((resolve) => {
+            chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
+                resolve(response?.state || false);
+            });
+        });
+    }
+
+    // On popup load, check the current state
+    const isActive = await getExtensionState();
+    if (isActive) {
+        await startExtension();
+    } else {
+        await stopExtension();
+    }
+
+    // Tab switching logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const tabName = btn.dataset.tab;
+
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none';
+            });
+
+            btn.classList.add('active');
+            const activeContent = document.getElementById(tabName);
+            activeContent.classList.add('active');
+            activeContent.style.display = 'block';
+
+            if (tabName === 'summarize') {
+                await createSummarizer();
+            }
+            if (tabName === 'translate') {
+                populateLanguageDropdowns();
+            }
+        });
+    });
+
+    document.querySelectorAll('.tab-content').forEach(content => {
+        if (!content.classList.contains('active')) {
+            content.style.display = 'none';
+        }
+    });
+
 
     // Function to create and manage the summarizer
     async function createSummarizer() {
@@ -131,7 +172,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             return false;
         }
     }
-
 
 
     // Function to convert markup to plain text
@@ -220,41 +260,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         return text;
     }
 
-
-    // Tab switching logic
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const tabName = btn.dataset.tab;
-
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => {
-                c.classList.remove('active');
-                c.style.display = 'none';
-            });
-
-            btn.classList.add('active');
-            const activeContent = document.getElementById(tabName);
-            activeContent.classList.add('active');
-            activeContent.style.display = 'block';
-
-            if (tabName === 'summarize') {
-                await createSummarizer();
-            }
-            if (tabName === 'translate') {
-                populateLanguageDropdowns();
-            }
-        });
-    });
-
-    document.querySelectorAll('.tab-content').forEach(content => {
-        if (!content.classList.contains('active')) {
-            content.style.display = 'none';
-        }
-    });
 
     // Summarize tab logic
     const summarizeBtn = document.getElementById('summarizeBtn');
