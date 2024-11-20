@@ -362,13 +362,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     };
 
-    simplifyBtn.addEventListener('click', async () => {
-        if (!aiSession && !(await initAI())) return;
+    if (level == '' || length == '') {
+        simplifyResult.innerText = 'Please select simplification level and length.';
+    }
+    else {
 
-        const text = textToSimplify.value.trim();
-        if (!text) return;
 
-        simplifyResult.innerHTML = `
+        simplifyBtn.addEventListener('click', async () => {
+            if (!aiSession && !(await initAI())) return;
+
+            const text = textToSimplify.value.trim();
+            if (!text) return;
+
+            simplifyResult.innerHTML = `
         <div class="loading-container">
             <div class="typing-indicator">
                 <span></span>
@@ -378,26 +384,26 @@ document.addEventListener('DOMContentLoaded', async function () {
         </div>
     `;
 
-        // const prompt = `Your response must have 3 sections only 1) Inshort 2) BreakDown 3) Think of it like this ,the given text is :\n\n${text}`;
+            // const prompt = `Your response must have 3 sections only 1) Inshort 2) BreakDown 3) Think of it like this ,the given text is :\n\n${text}`;
 
-        try {
-            await createRewriter();
+            try {
+                await createRewriter();
 
-            const stream = await rewriter.rewriteStreaming(text);
-            let response = '';
+                const stream = await rewriter.rewriteStreaming(text);
+                let response = '';
 
-            for await (const chunk of stream) {
-                response = chunk.trim();
-                simplifyResult.innerHTML = convertMarkdownToHTML(response);
+                for await (const chunk of stream) {
+                    response = chunk.trim();
+                    simplifyResult.innerHTML = response;
+                }
+
+            } catch (error) {
+                console.error('Error simplifying text:', error);
+                simplifyResult.innerText = 'Failed to simplify the text. Please try again.';
             }
+        });
 
-        } catch (error) {
-            console.error('Error simplifying text:', error);
-            simplifyResult.innerText = 'Failed to simplify the text. Please try again.';
-        }
-    });
-
-
+    }
 
 
 
