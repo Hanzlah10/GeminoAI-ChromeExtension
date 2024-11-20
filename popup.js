@@ -345,38 +345,64 @@ document.addEventListener('DOMContentLoaded', async function () {
     const simplifyBtn = document.getElementById('simplifyBtn');
     const textToSimplify = document.getElementById('textToSimplify');
     const simplificationLevel = document.getElementById('simplificationLevel');
+    const simplificationLength = document.getElementById('simplificationLength');
     const simplifyResult = document.getElementById('simplifyResult');
+
+    // Initialize rewriter (global rewriter variable)
+    let rewriter;
+    const level = simplificationLevel.value;
+    const length = simplificationLength.value;
+
+    const createRewriter = async () => {
+        rewriter = await self.ai.rewriter.create({
+            tone: level,
+            length: length,
+            format: 'as-is',
+            sharedContext: 'I dont understand complex things i want it in easy and simple format' // Example context, modify accordingly
+        });
+    };
 
     simplifyBtn.addEventListener('click', async () => {
         if (!aiSession && !(await initAI())) return;
+
         const text = textToSimplify.value.trim();
         if (!text) return;
 
         simplifyResult.innerHTML = `
-            <div class="loading-container">
-                <div class="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
+        <div class="loading-container">
+            <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
-        `;
-        const level = simplificationLevel.value;
-        const prompt = `${level === 'basic' ? 'Simplify in very basic language ' : 'Explain technically in very technical and professional language'} ; Your response must have 3 sections only 1) Inshort 2)BreakDown 3)Think of it like this ,the given text is :\n\n${text}`;
+        </div>
+    `;
+
+        // const prompt = `Your response must have 3 sections only 1) Inshort 2) BreakDown 3) Think of it like this ,the given text is :\n\n${text}`;
 
         try {
-            const stream = await aiSession.promptStreaming(prompt);
+            // Ensure rewriter is created before using
+            await createRewriter();
+
+            // Use the rewrite streaming API for simplification
+            const stream = await rewriter.rewriteStreaming(text);
             let response = '';
 
             for await (const chunk of stream) {
                 response = chunk.trim();
                 simplifyResult.innerHTML = convertMarkdownToHTML(response);
             }
+
         } catch (error) {
             console.error('Error simplifying text:', error);
             simplifyResult.innerText = 'Failed to simplify the text. Please try again.';
         }
     });
+
+
+
+
+
 
 
 
