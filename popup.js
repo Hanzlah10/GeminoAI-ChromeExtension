@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             tone: level,
             length: length,
             format: 'as-is',
-            sharedContext: 'I dont understand complex things i want it in easy and simple format' // Example context, modify accordingly
+            sharedContext: 'I dont understand complex things i want response in easy and simple format'
         });
     };
 
@@ -381,10 +381,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         // const prompt = `Your response must have 3 sections only 1) Inshort 2) BreakDown 3) Think of it like this ,the given text is :\n\n${text}`;
 
         try {
-            // Ensure rewriter is created before using
             await createRewriter();
 
-            // Use the rewrite streaming API for simplification
             const stream = await rewriter.rewriteStreaming(text);
             let response = '';
 
