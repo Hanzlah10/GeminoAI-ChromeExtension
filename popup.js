@@ -348,7 +348,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const simplificationLength = document.getElementById('simplificationLength');
     const simplifyResult = document.getElementById('simplifyResult');
 
-    // Initialize rewriter (global rewriter variable)
     let rewriter;
     const level = simplificationLevel.value;
     const length = simplificationLength.value;
@@ -383,8 +382,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             </div>
         </div>
     `;
-
-            // const prompt = `Your response must have 3 sections only 1) Inshort 2) BreakDown 3) Think of it like this ,the given text is :\n\n${text}`;
 
             try {
                 await createRewriter();
