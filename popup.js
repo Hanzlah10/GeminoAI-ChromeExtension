@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        if (!self.translation) {
+        if (!self.ai.translator) {
             showError('Translation API not available. Please enable it in chrome://flags.');
             return;
         }
@@ -507,10 +507,13 @@ document.addEventListener('DOMContentLoaded', async function () {
                 targetLanguage: elements.targetLanguage.value
             };
 
+
             const canTranslate = await translation.canTranslate(languagePair);
+            // const canTranslate = await self.ai.translator.canTranslate(languagePair);
 
             if (canTranslate === 'readily') {
-                const translator = await translation.createTranslator(languagePair);
+                const translator = await self.ai.translator.create(languagePair);
+                // const translator = await translation.createTranslator(languagePair);
                 const translatedText = await translator.translate(text);
                 elements.translationResult.textContent = translatedText;
                 elements.translationResult.classList.remove('placeholder');
